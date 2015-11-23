@@ -51,8 +51,11 @@ def createServiceOptions(unitname):
 
 def removeOldUnits():
 	for unit in oldunits:
-		deleteunit = requests.delete(url+'/'+unit)
-		sys.stdout.write('destroyed unit(s) result: %s' % deleteunit.content)
+		try:
+			deleteunit = requests.delete(url+'/'+unit)
+			sys.stdout.write('\n destroyed unit(s) result: %s' % deleteunit.content)
+		except Exception:
+			sys.stdout.write('\n unit not found: %s' % deleteunit.content)
 
 def createUnit(unitname):
 	# if unitname[-1] != '@':
