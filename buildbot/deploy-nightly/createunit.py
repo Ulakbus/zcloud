@@ -30,6 +30,7 @@ def incrementUnitName(unitname):
 	sys.stdout.write('number of old units with name "%s": %s' % (unitname, oldunitscount))
 
 	# oldunits will be destroyed after unit created and registered to haproxy
+	global oldunits
 	oldunits = [i for i in units if unitname.split('@')[0] in i]
 	sys.stdout.write('old units with name "%s": %s' % (unitname, oldunits))
 
