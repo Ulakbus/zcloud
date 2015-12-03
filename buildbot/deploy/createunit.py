@@ -27,12 +27,13 @@ def incrementUnitName(unitname):
 
 	# oldunitscount is count of units with given unitname
 	oldunitscount = sum(1 for i in units if unitname.split('@')[0] in i) - 1
-	sys.stdout.write('number of old units with name "%s": %s' % (unitname, oldunitscount))
+	sys.stdout.write('number of old units with name "%s": %s\n\n' % (unitname, oldunitscount))
 
 	# oldunits will be destroyed after unit created and registered to haproxy
 	# first item is base unit file
+	global oldunits
 	oldunits = [i for i in units if unitname.split('@')[0] in i][2:]
-	sys.stdout.write('old units with name "%s": %s' % (unitname, oldunits))
+	sys.stdout.write('old units with name "%s": %s \n\n' % (unitname, oldunits))
 
 	for unit in units:
 		if unitname.split('@')[0] in unit:
@@ -50,10 +51,11 @@ def createServiceOptions(unitname):
 		options.append({'section':section, 'name': line.split('=')[0], 'value': '='.join(line.split('=')[1:])}) if '=' in line else True
 	return options
 
-def removeOldUnits():
+def removeOldUnits(unitname):
 	for unit in oldunits:
 		deleteunit = requests.delete(url+'/'+unit)
-		sys.stdout.write('destroyed unit(s) result: %s' % deleteunit.content)
+		sys.stdout.write('##########  UNIT DESTROYED!!! ##########  \n\n')
+		sys.stdout.write('destroyed unit(s) result: %s \n\n' % deleteunit.content)
 
 def createUnit(unitname):
 	# if unitname[-1] != '@':
@@ -63,15 +65,15 @@ def createUnit(unitname):
 	newunit['desiredState'] = 'launched'
 	newunit['options'] = createServiceOptions(unitname)
 	unitcreate = requests.put(url+'/'+newunit['name'], data=json.dumps(newunit), headers=headers)
-	sys.stdout.write('created unit with name %s' % newunit['name'])
+	sys.stdout.write('created unit with name %s \n\n' % newunit['name'])
 	# wait for new unit registered to haproxy
 	try:
 	    if sys.argv[2] == "--no-delete":
 	    	return unitcreate.content
 	except IndexError:
-		time.sleep(60)
+		time.sleep(120)
 		removeOldUnits()
-		sys.stdout.write('destroyed unit(s) with name %s' % ', '.join(oldunits))
+		sys.stdout.write('destroyed unit(s) with name %s \n\n' % ', '.join(oldunits))
 
 	return unitcreate.content
 
