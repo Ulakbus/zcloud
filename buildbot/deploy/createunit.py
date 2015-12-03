@@ -26,11 +26,12 @@ def incrementUnitName(unitname):
 	units = [u['name'] for u in requests.get(url).json()['units']]
 
 	# oldunitscount is count of units with given unitname
-	oldunitscount = sum(1 for i in units if unitname.split('@')[0] in i)
+	oldunitscount = sum(1 for i in units if unitname.split('@')[0] in i) - 1
 	sys.stdout.write('number of old units with name "%s": %s' % (unitname, oldunitscount))
 
 	# oldunits will be destroyed after unit created and registered to haproxy
-	oldunits = [i for i in units if unitname.split('@')[0] in i]
+	# first item is base unit file
+	oldunits = [i for i in units if unitname.split('@')[0] in i][2:]
 	sys.stdout.write('old units with name "%s": %s' % (unitname, oldunits))
 
 	for unit in units:
@@ -68,7 +69,7 @@ def createUnit(unitname):
 	    if sys.argv[2] == "--no-delete":
 	    	return unitcreate.content
 	except IndexError:
-		time.sleep(150)
+		time.sleep(60)
 		removeOldUnits()
 		sys.stdout.write('destroyed unit(s) with name %s' % ', '.join(oldunits))
 
