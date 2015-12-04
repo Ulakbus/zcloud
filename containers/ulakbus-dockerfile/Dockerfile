@@ -21,6 +21,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends git libssl-dev 
     && apt-get purge -y gcc \
     && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+# set python default encoding to utf8
+RUN sed -i "s/encoding = \"ascii\"/encoding = \"utf-8\"/" /usr/local/lib/python2.7/site.py
+
 # Open ports for HTTP and Protocol Buffers
 EXPOSE 9001
 
