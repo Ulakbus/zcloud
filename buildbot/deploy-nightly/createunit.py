@@ -73,7 +73,7 @@ def createUnit(unitname):
 	    	return unitcreate.content
 	except IndexError:
 		time.sleep(150)
-		removeOldUnits()
+		# removeOldUnits()
 		sys.stdout.write('destroyed unit(s) with name %s' % ', '.join(oldunits))
 
 	return unitcreate.content
