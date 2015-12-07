@@ -51,7 +51,7 @@ def createServiceOptions(unitname):
 		options.append({'section':section, 'name': line.split('=')[0], 'value': '='.join(line.split('=')[1:])}) if '=' in line else True
 	return options
 
-def removeOldUnits(unitname):
+def removeOldUnits():
 	for unit in oldunits:
 		deleteunit = requests.delete(url+'/'+unit)
 		sys.stdout.write('##########  UNIT DESTROYED!!! ##########  \n\n')
