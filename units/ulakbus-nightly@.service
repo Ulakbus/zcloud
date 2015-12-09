@@ -9,7 +9,6 @@ After=docker.service
 TimeoutStartSec=0
 KillMode=none
 EnvironmentFile=/etc/environment
-Environment=DEFAULT_BUCKET_TYPE=buildbot_test
 ExecStartPre=-/usr/bin/docker kill ulakbus-nightly-%i
 ExecStartPre=-/usr/bin/docker rm ulakbus-nightly-%i
 ExecStartPre=/usr/bin/docker pull zetaops/ulakbus-nightly
