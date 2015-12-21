@@ -1,5 +1,5 @@
 [template]
-src	= "haproxy.cfg"
+src	= "ssl_ca.cfg"
 dest	= "/usr/local/etc/ssl/ulakbus.net.ca"
 keys	= [
     "/zaerp/certs/ulakbus.net.ca",
