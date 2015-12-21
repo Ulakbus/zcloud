@@ -1,0 +1,8 @@
+[template]
+src	= "ssl_pem.cfg"
+dest	= "/usr/local/etc/ssl/ulakbus.net.pem"
+keys	= [
+    "/zaerp/certs/ulakbus.net.priv",
+    "/zaerp/certs/ulakbus.net.ca",
+    "/zaerp/certs/ulakbus.net.crt"
+]
