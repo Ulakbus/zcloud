@@ -21,6 +21,7 @@ USER buildbot
 WORKDIR /buildslave
 
 # environment variables
+ENV PYTHONIOENCODING UTF-8
 ENV PYOKO_SETTINGS 'ulakbus.settings'
 ENV RIAK_SERVER 'ulakbus-load-balancer-02.zetaops.local'
 ENV RIAK_PORT '8098'

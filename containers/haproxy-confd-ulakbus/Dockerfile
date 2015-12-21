@@ -21,8 +21,27 @@ ADD https://github.com/kelseyhightower/confd/releases/download/v${CONFDVERSION}/
 RUN chmod u+x /usr/local/bin/confd
 
 # confd configuration
-ADD haproxy.cfg /etc/confd/templates/haproxy.cfg
-ADD haproxy.toml /etc/confd/conf.d/haproxy.toml
+ADD zhaproxy.cfg /etc/confd/templates/zhaproxy.cfg
+ADD zhaproxy.toml /etc/confd/conf.d/zhaproxy.toml
+
+ADD ssl_ca.cfg /etc/confd/templates/ssl_ca.cfg
+ADD ssl_ca.toml /etc/confd/conf.d/ssl_ca.toml
+
+RUN mkdir -p /usr/local/etc/ssl
+RUN echo "" > /usr/local/etc/ssl/ulakbus.net.pem
+RUN echo "" > /usr/local/etc/ssl/ulakbus.net.ca
+RUN echo "" > /usr/local/etc/ssl/ulakbus.net.crt
+RUN echo "" > /usr/local/etc/ssl/ulakbus.net.key
+
+ADD ssl_crt.cfg /etc/confd/templates/ssl_crt.cfg
+ADD ssl_crt.toml /etc/confd/conf.d/ssl_crt.toml
+
+ADD ssl_key.cfg /etc/confd/templates/ssl_key.cfg
+ADD ssl_key.toml /etc/confd/conf.d/ssl_key.toml
+
+ADD ssl_pem.cfg /etc/confd/templates/ssl_pem.cfg
+ADD ssl_pem.toml /etc/confd/conf.d/ssl_pem.toml
+
 ADD configuration.toml /etc/confd/confd.toml
 
 COPY entrypoint.sh /
@@ -49,5 +68,4 @@ RUN service rsyslog restart
 ENTRYPOINT ["/entrypoint.sh"]
 
 EXPOSE 80
-EXPOSE 9001
-EXPOSE 8010
+EXPOSE 443

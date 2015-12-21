@@ -26,13 +26,13 @@ def incrementUnitName(unitname):
 	units = [u['name'] for u in requests.get(url).json()['units']]
 
 	# oldunitscount is count of units with given unitname
-	oldunitscount = sum(1 for i in units if unitname.split('@')[0] in i) - 1
+	oldunitscount = sum(1 for i in units if unitname.split('@')[0] == i.split('@')[0] and i.split('@')[1] != '.service')
 	sys.stdout.write('number of old units with name "%s": %s\n\n' % (unitname, oldunitscount))
 
 	# oldunits will be destroyed after unit created and registered to haproxy
 	# first item is base unit file
 	global oldunits
-	oldunits = [i for i in units if unitname.split('@')[0] in i][2:]
+	oldunits = [i for i in units if unitname.split('@')[0]  == i.split('@')[0] and i.split('@')[1] != '.service']
 	sys.stdout.write('old units with name "%s": %s \n\n' % (unitname, oldunits))
 
 	for unit in units:
@@ -51,7 +51,7 @@ def createServiceOptions(unitname):
 		options.append({'section':section, 'name': line.split('=')[0], 'value': '='.join(line.split('=')[1:])}) if '=' in line else True
 	return options
 
-def removeOldUnits(unitname):
+def removeOldUnits():
 	for unit in oldunits:
 		deleteunit = requests.delete(url+'/'+unit)
 		sys.stdout.write('##########  UNIT DESTROYED!!! ##########  \n\n')
