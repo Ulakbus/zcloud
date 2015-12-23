@@ -21,9 +21,11 @@ ENV S3_PROXY_PORT 8080
 ENV S3_BUCKET_NAME ulakbus
 
 # libssl and libffi dev packages for riak client
-RUN apt-get update && apt-get install -y --no-install-recommends git libssl-dev libffi-dev gcc \
-    && pip install cryptography \
+RUN apt-get update && apt-get install -y --no-install-recommends git libssl-dev libffi-dev gcc
+RUN apt-get update && apt-get install -y --no-install-recommends build-essential libfreetype6-dev python-dev libtiff5-dev zlib1g-dev libjbig0 libjpeg62-turbo liblcms2-2 libtiff5 libwebp5 libwebpdemux1 libwebpmux1 libfreetype6-dev liblcms2-dev libwebp-dev tcl8.6-dev tk8.6-dev python-tk
+RUN pip install cryptography \
     && pip install gunicorn gevent
+    && pip install reportlab
 
 RUN apt-get purge -y gcc \
     && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
