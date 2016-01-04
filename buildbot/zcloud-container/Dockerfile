@@ -10,6 +10,7 @@ RUN mkdir /buildslave && chown buildbot:buildbot /buildslave
 RUN chown -R buildbot:buildbot /usr/local/
 USER buildbot
 WORKDIR /buildslave
+RUN mkdir /home/buildbot/.docker/
 COPY image_builder.py /buildslave/
 COPY buildbot.tac /buildslave/
 COPY grepdirectories.sh /buildslave/
