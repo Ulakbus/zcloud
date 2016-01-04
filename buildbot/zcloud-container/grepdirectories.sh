@@ -1,3 +1,4 @@
+mkdir ~/.docker
 echo "{
     'https://index.docker.io/v1/': {
         'auth': $DOCKERHUBPASS,
