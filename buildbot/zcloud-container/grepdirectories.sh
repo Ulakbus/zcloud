@@ -20,7 +20,7 @@ UNIQUE_CONTAINERS=($(for v in "${CONTAINERS[@]}"; do echo "$v";done| sort| uniq|
 echo ${UNIQUE_CONTAINERS[@]}
 
 BASEPATH=$(pwd)
-echo BASEPATH
+echo $BASEPATH
 
 for d in ${UNIQUE_CONTAINERS[@]}; do
 	cd $($BASEPATH)'/containers/'$d
