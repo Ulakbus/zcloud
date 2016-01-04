@@ -12,12 +12,16 @@ CONTAINERS=(); for f in $FILES; do d=( ${f//\// }); if [[  ${d[0]} == 'container
 UNIQUE_CONTAINERS=($(for v in "${CONTAINERS[@]}"; do echo "$v";done| sort| uniq| xargs))
 echo ${UNIQUE_CONTAINERS[@]}
 
-BASEPATH=pwd
+BASEPATH=$(pwd)
+echo BASEPATH
 
 for d in ${UNIQUE_CONTAINERS[@]}; do
-	cd $($BASEPATH)'/build/containers/'$($d)
+	cd $($BASEPATH)'/containers/'$d
+	echo pwd
 	BUILDNAME=$(cut -d ' ' $(cat Dockerfile | grep 'BUILDNAME') -f2)
+	echo "building $BUILDNAME ..."
 	docker build -t $BUILDNAME .
+	echo "pushing $BUILDNAME ..."
 	docker push $BUILDNAME;
 	cd $($BASEPATH)
 done;
