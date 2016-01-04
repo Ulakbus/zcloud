@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y \
    docker.io
 RUN pip install twisted==15.2.1 buildbot-slave requests
 RUN groupadd -r buildbot && useradd -r -g buildbot buildbot
+RUN echo 'buildbot ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 RUN mkdir /buildslave && chown buildbot:buildbot /buildslave
 RUN mkdir /home/buildbot && chown buildbot:buildbot /home/buildbot
 RUN chown -R buildbot:buildbot /usr/local/
