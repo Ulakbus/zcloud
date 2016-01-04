@@ -1,1 +1,1 @@
-buildslave create-slave . $MASTER_HOST:9989 zcloud-container-build 3V6SBwag
+buildslave create-slave . $MASTER_HOST:9989 zcloud-container-build-slave 3V6SBwag
