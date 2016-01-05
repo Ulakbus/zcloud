@@ -8,6 +8,7 @@ echo "{
 
 
 FILES=$(git diff-tree --no-commit-id --name-only -r $(git rev-parse HEAD))
+echo $FILES
 CONTAINERS=()
 for f in $FILES; do 
 	d=( ${f//\// }); 
