@@ -1,6 +1,7 @@
 FROM python:2.7-slim
 MAINTAINER Ali Riza Keles, alirza@zetaops.io
 
+# BUILDNAME=zetaops/ulakbus-nightly
 # env vars for ulakbus
 ENV PYTHONIOENCODING UTF-8
 ENV ZENGINE_SETTINGS ulakbus.settings
