@@ -30,12 +30,10 @@ if __name__ == '__main__':
         buildname = [line.split('=') for line in f.readlines() if 'BUILDNAME' in line][0][1]
         buildname = buildname.replace('\n', '')
 
-        # dockerfile must be a file instance to use with docker-py
-        dockerfile = open("Dockerfile". "r")
         print("buildname: ", buildname, "will be built")
 
         client = docker.Client("http://ulakbus-buildbot-slave-01.zetaops.local:2375", version="auto")
-        buildit= client.build(tag=buildname, fileobj=dockerfile)
+        buildit= client.build(tag=buildname, path=os.getcwd())
         for i in buildit:
         	print(i)
         
