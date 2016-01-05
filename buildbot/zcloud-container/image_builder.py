@@ -39,6 +39,8 @@ if __name__ == '__main__':
         
         print("############# build finished ############")
 
+        login = client.login(email=os.getenv('DOCKERHUBMAIL'), username=os.getenv('DOCKERHUBUSERNAME'), password=os.getenv('DOCKERHUBPASS'))
+
         pushit= client.push(buildname)
         for i in pushit:
         	print(i)
