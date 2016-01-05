@@ -13,7 +13,6 @@ USER buildbot
 WORKDIR /buildslave
 COPY image_builder.py /buildslave/
 COPY buildbot.tac /buildslave/
-RUN chown buildbot:buildbot /buildslave/grepdirectories.sh
 #RUN chmod +x create && ./create
 ENTRYPOINT ["/usr/local/bin/buildslave"]
 CMD ["start", "--nodaemon"]
