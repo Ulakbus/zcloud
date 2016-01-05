@@ -2,9 +2,8 @@ FROM phusion/baseimage:0.9.17
 RUN apt-get update && apt-get install -y \
    python-dev \
    python-pip \
-   git \
-   docker.io
-RUN pip install twisted==15.2.1 buildbot-slave requests
+   git
+RUN pip install twisted==15.2.1 buildbot-slave requests docker-py
 RUN groupadd -r buildbot && useradd -r -g buildbot buildbot
 RUN echo 'buildbot ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 RUN mkdir /buildslave && chown buildbot:buildbot /buildslave
