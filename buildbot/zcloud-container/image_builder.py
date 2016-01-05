@@ -6,24 +6,45 @@
 import sys
 import os
 import subprocess
+import docker
 
 if __name__ == '__main__':
+	# get files of latest comment
     files = subprocess.check_output("git diff-tree --no-commit-id --name-only -r $(git rev-parse HEAD)", shell=True).split('\n')
+
+    # if file in containers directory new docker image must be built
     containers = [f.split('/')[1] for f in files if 'containers' in f]
+
+    # remove duplicates of container names
     unique_containers = set(containers)
+    # basepath for reaching proper Dockerfile
     basepath = '/buildslave/sourcefiles/containers/'
 
     for i in unique_containers:
         os.chdir(basepath+i)
-        print(os.getcwd(), os.listdir('.'))
+        print("directory and its contents: ", os.getcwd(), os.listdir('.'))
+
+        # get buildname from Dockerfile
+        # it must be commented line with format: # BUILDNAME='sample/buildname'
         f = open("Dockerfile", "r")
         buildname = [line.split('=') for line in f.readlines() if 'BUILDNAME' in line][0][1]
         buildname = buildname.replace('\n', '')
+
+        # dockerfile must be a file instance to use with docker-py
+        dockerfile = open("Dockerfile". "r")
         print("buildname: ", buildname, "will be built")
-        buildcmd = "docker build -t %s ." % buildname
-        process = subprocess.Popen(buildcmd, shell=True, stdout=subprocess.PIPE)
-        process.wait()
-        print("build result: ", process.returncode)
-        pushcmd = "docker push %s" % buildname
-        push_process = subprocess.Popen(pushcmd, shell=True, stdout=subprocess.PIPE)
-        push_process.wait()
+
+        client = docker.Client("http://ulakbus-buildbot-slave-01.zetaops.local:2375", version="auto")
+        buildit= client.build(tag=buildname, fileobj=dockerfile)
+        for i in buildit:
+        	print(i)
+        
+        print("############# build finished ############")
+
+        pushit= client.push(buildname)
+        for i in pushit:
+        	print(i)
+
+        print("############# push finished ############")
+
+    # thanks
