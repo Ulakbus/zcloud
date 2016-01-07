@@ -16,7 +16,8 @@ if __name__ == '__main__':
     scripts = [f.split('/')[1] for f in files.split('\n') if 'scripts' in f]
 
     # if template.json version changed
-    is_version_changed = True if subprocess.check_output("git diff $(git rev-parse HEAD) template.json | grep version", shell=True) else False
+    # is_version_changed = True if subprocess.check_output("git diff $(git rev-parse HEAD) template.json | grep version", shell=True) else False
+    is_version_changed = True if 'template.json' in files else False
 
     if is_version_changed:
         f=open('template.json', 'rw')
