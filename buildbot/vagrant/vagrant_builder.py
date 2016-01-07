@@ -24,7 +24,7 @@ if __name__ == '__main__':
         f=open('template.json', 'rw')
         fdict=json.loads(f.read())
         version_digits = fdict['post-processors'][0][1]['metadata']['version'].split('.')
-        newversion = '.'.join([version_digits[0:2], str(int(version_digits[2]) + 1)])
+        newversion = '.'.join(version_digits[0:2] + [str(int(version_digits[2]) + 1)])
         print("new version is: ", newversion)
         fdict['post-processors'][0][1]['metadata']['version'] = newversion
         f.write(json.dumps(fdict, sort_keys, indent=4))
