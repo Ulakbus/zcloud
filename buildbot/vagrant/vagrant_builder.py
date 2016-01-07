@@ -17,7 +17,7 @@ if __name__ == '__main__':
 
     # if template.json version changed
     # is_version_changed = True if subprocess.check_output("git diff $(git rev-parse HEAD) template.json | grep version", shell=True) else False
-    is_version_changed = True if 'template.json' in files else False
+    is_version_changed = False if 'template.json' in files else True
 
     if is_version_changed:
         f=open('template.json', 'rw')

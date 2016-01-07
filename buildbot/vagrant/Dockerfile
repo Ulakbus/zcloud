@@ -12,6 +12,7 @@ RUN chown -R buildbot:buildbot /usr/local/
 USER buildbot
 RUN git config --global user.email "you@example.com"
 RUN git config --global user.name "Buildbot of ZetaOps"
+RUN git config --global push.default matching
 WORKDIR /buildslave
 COPY vagrant_builder.py /buildslave/
 COPY buildbot.tac /buildslave/
