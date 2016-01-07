@@ -9,9 +9,9 @@ RUN echo 'buildbot ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 RUN mkdir /buildslave && chown buildbot:buildbot /buildslave
 RUN mkdir /home/buildbot && chown buildbot:buildbot /home/buildbot
 RUN chown -R buildbot:buildbot /usr/local/
+USER buildbot
 RUN git config --global user.email "you@example.com"
 RUN git config --global user.name "Buildbot of ZetaOps"
-USER buildbot
 WORKDIR /buildslave
 COPY vagrant_builder.py /buildslave/
 COPY buildbot.tac /buildslave/
