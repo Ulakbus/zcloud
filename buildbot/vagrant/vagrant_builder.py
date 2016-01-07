@@ -7,6 +7,7 @@ import sys
 import os
 import subprocess
 import docker
+import json
 
 if __name__ == '__main__':
 	# get files of latest comment
