@@ -21,13 +21,15 @@ if __name__ == '__main__':
     is_version_changed = False if 'template.json' in files else True
 
     if is_version_changed:
-        f=open('template.json', 'rw')
+        f=open('template.json', 'r')
         fdict=json.loads(f.read())
         version_digits = fdict['post-processors'][0][1]['metadata']['version'].split('.')
         newversion = '.'.join(version_digits[0:2] + [str(int(version_digits[2]) + 1)])
         print("new version is: ", newversion)
         fdict['post-processors'][0][1]['metadata']['version'] = newversion
-        f.write(json.dumps(fdict, sort_keys, indent=4))
+        f.close()
+        f=open('template.json', 'w')
+        f.write(json.dumps(fdict, sort_keys=True, indent=4))
         f.close()
 
     # thanks
