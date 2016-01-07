@@ -27,7 +27,7 @@ if __name__ == '__main__':
         newversion = '.'.join(version_digits[0:2] + [str(int(version_digits[2]) + 1)])
         print("new version is: ", newversion)
         fdict['post-processors'][0][1]['metadata']['version'] = newversion
-        f.write(json.dumps(fdict), sort_keys=True, indent=4)
+        f.write(json.dumps(fdict, sort_keys, indent=4))
         f.close()
 
     # thanks
