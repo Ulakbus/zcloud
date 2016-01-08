@@ -5,7 +5,7 @@ RUN apt-get update && apt-get install -y \
    git \
    wget \
    unzip
-RUN wget -q -O /packer.zip "https://releases.hashicorp.com/packer/0.8.6/packer_0.8.6_freebsd_amd64.zip" && unzip /packer.zip -d /bin
+RUN wget -q -O /packer.zip "https://releases.hashicorp.com/packer/0.8.6/packer_0.8.6_linux_amd64.zip" && unzip /packer.zip -d /bin
 RUN pip install twisted==15.2.1 buildbot-slave requests docker-py
 RUN groupadd -r buildbot && useradd -r -g buildbot buildbot
 RUN echo 'buildbot ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
