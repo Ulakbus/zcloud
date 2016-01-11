@@ -5,6 +5,6 @@ set timeout 20
 spawn git push origin gh-pages
 
 expect "Username for 'https://github.com':" { send "$user\r" }
-expect "Password for 'https://$user@github.com':" { send "$password\r" }
+expect "Password for 'https://zetaopsbot@github.com':" { send "$password\r" }
 
 interact
