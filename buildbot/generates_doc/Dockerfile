@@ -5,7 +5,8 @@ RUN apt-get update && apt-get install -y \
    python-sphinx \
    git \
    wget \
-   graphviz
+   graphviz \
+   expect
 RUN pip install twisted==15.2.1 buildbot-slave requests sphinxcontrib-plantuml sphinxjp.themes.bizstyle
 RUN groupadd -r buildbot && useradd -r -g buildbot buildbot
 RUN mkdir /opt/plantuml && wget http://heanet.dl.sourceforge.net/project/plantuml/plantuml.jar && mv plantuml.jar /opt/plantuml/
