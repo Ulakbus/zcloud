@@ -25,10 +25,13 @@ RUN git clone https://github.com/zetaops/pyoko.git /buildslave/pyoko
 RUN git clone https://github.com/zetaops/ulakbus.org.git /buildslave/ulakbus.org
 COPY doc_generate.sh /buildslave/
 COPY unite_docs.sh /buildslave/
+COPY git_push_with_expect.sh /buildslave/
 RUN chown buildbot:buildbot /buildslave/doc_generate.sh
 RUN chown buildbot:buildbot /buildslave/unite_docs.sh
+RUN chown buildbot:buildbot /buildslave/git_push_with_expect.sh
 RUN chmod +x /buildslave/doc_generate.sh
 RUN chmod +x /buildslave/unite_docs.sh
+RUN chmod +x /buildslave/git_push_with_expect.sh
 COPY buildbot.tac /buildslave/
 #RUN chmod +x create && ./create
 ENTRYPOINT ["/usr/local/bin/buildslave"]
