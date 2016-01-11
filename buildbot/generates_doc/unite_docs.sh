@@ -16,5 +16,3 @@ echo "pyoko docs copied to gh-pages branch"
 git add .
 git commit -m "Buildbot generated docs for humanity, thanks..."
 ../git_push_with_expect.sh $(echo $BUILDBOTGITHUBPASS)
-sleep 20 
-echo "pushed successfully"
