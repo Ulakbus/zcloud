@@ -4,6 +4,6 @@ spawn git push origin gh-pages
 
 expect "Username for 'https://github.com':" { send "zetaopsbot\r" }
 expect "Password for 'https://zetaopsbot@github.com':" { send "$password\r" }
-expect "Push successfull" { send "\r" }
+expect "Push successfull" { send "ok\r" }
 
 interact
