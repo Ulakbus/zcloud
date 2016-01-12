@@ -1,4 +1,5 @@
 cd /buildslave/ulakbus.org
+rm source/modules.rst
 git checkout -b gh-pages origin/gh-pages
 # cp gh-pages wiki
 cp -r /buildslave/ulakbus.org/build/html/* /buildslave/ulakbus.org/wiki/
