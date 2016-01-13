@@ -2,14 +2,22 @@
 
 MAINTAINER='Ali Riza Keles, alirza@zetaops.io'
 export DEBIAN_FRONTEND='noninteractive'
-
-# set hostname ip adress
+DOMAIN='zetaops.local'
+DNS_MASTER='10.61.31.68'
+DNS_SLAVE='10.61.31.67'
 IP_ADDRESS=$(/sbin/ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}')
-echo "$IP_ADDRESS     $(hostname)" >> /etc/hosts
 
 # if strong consistency and riak control are unset, set them to defaults
 : ${STRONG_CONSISTENCY:='on'}
 : ${RIAK_CONTROL:='off'}
+
+# set hostname ip adress
+echo "$IP_ADDRESS  $(hostname).$DOMAIN  $(hostname)" >> /etc/hosts
+
+echo "search $DOMAIN" >> etc/resolvconf/resolv.conf.d/head
+echo "nameserver $DNS_MASTER" >> etc/resolvconf/resolv.conf.d/head
+echo "nameserver $DNS_SLAVE" >> etc/resolvconf/resolv.conf.d/head
+resolvconf -u
 
 # add riak repo
 # https://packagecloud.io/install/repositories/basho/riak/config_file.list?os=ubuntu&dist=trusty
@@ -23,7 +31,7 @@ sudo apt-get install -y libpam0g-dev apt-transport-https wget
 echo 'ulimit -n 65536' >> /etc/default/riak
 echo "session    required   pam_limits.so" >> /etc/pam.d/common-session
 echo "session    required   pam_limits.so" >> /etc/pam.d/common-session-noninteractive
-sed '$i\*              soft     nofile          65536\n\*              hard     nofile          65536'  /etc/security/limits.conf
+sed -i '$i\*              soft     nofile          65536\n\*              hard     nofile          65536'  /etc/security/limits.conf
 
 echo 1024 > /sys/block/vdb/queue/nr_requests
 echo 'ethtool -K eth0 tso off' >> /etc/rc.local
@@ -55,8 +63,8 @@ echo 'vm.dirty_writeback_centisecs = 100' >> /etc/sysctl.conf
 echo 'vm.dirty_expire_centisecs = 200' >> /etc/sysctl.conf
 
 # update linux kernel options and update grub
-sed 's/GRUB_CMDLINE_LINUX_DEFAULT="/GRUB_CMDLINE_LINUX_DEFAULT="elevator=noop /' /etc/default/grub
-sed 's/GRUB_CMDLINE_LINUX_DEFAULT="/GRUB_CMDLINE_LINUX_DEFAULT="clocksource=hpet /' /etc/default/grub
+sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="/GRUB_CMDLINE_LINUX_DEFAULT="elevator=noop /' /etc/default/grub
+sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="/GRUB_CMDLINE_LINUX_DEFAULT="clocksource=hpet /' /etc/default/grub
 update-grub
 
 
@@ -75,12 +83,13 @@ service riak stop
 # replace ip address nodename
 sed -i "s/riak@127.0.0.1/riak@${IP_ADDRESS}/" /etc/riak/riak.conf
 
+# Get riak.conf from zetaops public cloud tools
+wget https://raw.githubusercontent.com/zetaops/zcloud/master/containers/riak/conf/riak.conf -O /etc/riak/riak.conf
+
 # set strong consistency and riak_control on or off depends on docker run env vars
 sed -i "s/strong_consistency = off/strong_consistency = ${STRONG_CONSISTENCY}/" /etc/riak/riak.conf
 sed -i "s/riak_control = off/riak_control = ${RIAK_CONTROL}/" /etc/riak/riak.conf
 
-# Get riak.conf from zetaops public cloud tools
-wget https://raw.githubusercontent.com/zetaops/zcloud/master/containers/riak/conf/riak.conf -O /etc/riak/riak.conf
 wget https://raw.githubusercontent.com/zetaops/zcloud/master/containers/riak/conf/advanced.config -O /etc/riak/advanced.config
 chown riak:riak /etc/riak/riak.conf && chmod 755 /etc/riak/riak.conf
 
@@ -90,6 +99,12 @@ wget https://raw.githubusercontent.com/zetaops/zcloud/master/containers/riak/cer
 wget https://raw.githubusercontent.com/zetaops/zcloud/master/containers/riak/certs/key.pem -O /etc/riak/key.pem
 chown riak:riak /etc/riak/cacertfile.pem /etc/riak/cert.pem /etc/riak/key.pem
 chmod 600 /etc/riak/cacertfile.pem /etc/riak/cert.pem /etc/riak/key.pem
+
+mkdir -p /mnt/backup
+echo "/dev/vdb1		/var/lib/riak	ext4	rw,noatime,barrier=0,data=writeback		0 0" >> /etc/fstab
+echo "/dev/vdc1		/mnt/backup	    ext4	rw,noatime,barrier=0,data=writeback		0 0" >> /etc/fstab
+mount /dev/vdb1
+chown -R riak:riak /var/lib/riak
 
 
 # sleep 10
