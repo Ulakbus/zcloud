@@ -2,12 +2,11 @@ FROM phusion/baseimage:0.9.17
 RUN apt-get update && apt-get install -y \
    python-dev \
    python-pip \
-   python-sphinx \
    git \
    wget \
    graphviz \
    expect
-RUN pip install twisted==15.2.1 buildbot-slave requests sphinxcontrib-plantuml sphinxjp.themes.bizstyle sphinxcontrib-napoleon
+RUN pip install twisted==15.2.1 buildbot-slave requests sphinx sphinxcontrib-plantuml sphinxjp.themes.bizstyle
 RUN groupadd -r buildbot && useradd -r -g buildbot buildbot
 RUN mkdir /opt/plantuml && wget http://heanet.dl.sourceforge.net/project/plantuml/plantuml.jar && mv plantuml.jar /opt/plantuml/
 RUN echo 'buildbot ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
