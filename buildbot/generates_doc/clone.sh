@@ -1,0 +1,1 @@
+git clone https://github.com/zetaops/ulakbus.git /buildslave/ulakbus && git clone https://github.com/zetaops/zengine.git /buildslave/zengine && git clone https://github.com/zetaops/pyoko.git /buildslave/pyoko && git clone https://github.com/zetaops/ulakbus.org.git /buildslave/ulakbus.org
