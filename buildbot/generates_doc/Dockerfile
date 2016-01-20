@@ -2,6 +2,8 @@ FROM phusion/baseimage:0.9.17
 RUN apt-get update && apt-get install -y \
    python-dev \
    python-pip \
+   libffi-dev \
+   libssl-dev \
    git \
    wget \
    graphviz \
