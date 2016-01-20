@@ -5,7 +5,16 @@ RUN apt-get update && apt-get install -y \
    git \
    wget \
    graphviz \
-   expect
+   expect \
+   libtiff5-dev \
+   libjpeg8-dev \
+   zlib1g-dev \
+   libfreetype6-dev \
+   liblcms2-dev \
+   libwebp-dev \
+   tcl8.6-dev \
+   tk8.6-dev \
+   python-tk
 RUN pip install twisted==15.2.1 buildbot-slave requests sphinx sphinxcontrib-plantuml sphinxcontrib-images sphinxjp.themes.bizstyle
 RUN pip install --upgrade sphinx
 RUN groupadd -r buildbot && useradd -r -g buildbot buildbot
