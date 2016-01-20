@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y \
    python-tk
 RUN pip install twisted==15.2.1 buildbot-slave requests sphinx sphinxcontrib-plantuml sphinxcontrib-images sphinxjp.themes.bizstyle
 RUN pip install --upgrade sphinx
+RUN easy_install --upgrade six
 RUN groupadd -r buildbot && useradd -r -g buildbot buildbot
 RUN mkdir /opt/plantuml && wget http://heanet.dl.sourceforge.net/project/plantuml/plantuml.jar && mv plantuml.jar /opt/plantuml/
 RUN echo 'buildbot ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
