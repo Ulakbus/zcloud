@@ -21,7 +21,7 @@ RUN pip install twisted==15.2.1 buildbot-slave pytest
 RUN pip3 install pytest
 RUN easy_install --upgrade six
 RUN easy_install3 --upgrade six
-RUN sed -i "s/encoding = \"ascii\"/encoding = \"utf-8\"/" /usr/local/lib/python2.7/site.py
+RUN sed -i "s/encoding = \"ascii\"/encoding = \"utf-8\"/" /usr/lib/python2.7/site.py
 RUN groupadd -r buildbot && useradd -r -g buildbot buildbot
 # RUN sed -Ei 's/(\%buildbot ALL=\(ALL\) )ALL/\1 NOPASSWD:ALL/' /etc/sudoers
 RUN mkdir /buildslave && chown buildbot:buildbot /buildslave
