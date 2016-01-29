@@ -31,10 +31,7 @@ RUN git config --global user.email "you@example.com"
 RUN git config --global user.name "Buildbot of ZetaOps"
 RUN git config --global push.default upstream
 WORKDIR /buildslave
-# RUN git clone https://github.com/zetaops/ulakbus.git /buildslave/ulakbus
-# RUN git clone https://github.com/zetaops/zengine.git /buildslave/zengine
-# RUN git clone https://github.com/zetaops/pyoko.git /buildslave/pyoko
-# RUN git clone https://github.com/zetaops/ulakbus.org.git /buildslave/ulakbus.org
+ENV PYOKO_SETTINGS ulakbus.settings
 COPY clone.sh /buildslave/
 COPY doc_generate.sh /buildslave/
 COPY unite_docs.sh /buildslave/
