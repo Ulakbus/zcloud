@@ -5,15 +5,23 @@ git checkout -b gh-pages origin/gh-pages
 cp -r /buildslave/ulakbus.org/build/html/* /buildslave/ulakbus.org/wiki/
 echo "gh-pages wiki copied to gh-pages branch"
 
-cp -r /buildslave/ulakbus/docs/build/html /buildslave/ulakbus.org/ulakbus
+rm -rf /buildslave/ulakbus.org/ulakbus
+mv /buildslave/ulakbus/docs/build/html /buildslave/ulakbus.org/ulakbus
 echo "ulakbus docs copied to gh-pages branch"
 
-cp -r /buildslave/zengine/docs/build/html /buildslave/ulakbus.org/zengine
+rm -rf /buildslave/ulakbus.org/ulakbus/tests
+mv /buildslave/ulakbus/tests/docs/build/html /buildslave/ulakbus.org/ulakbus/tests
+echo "ulakbus tests docs copied to gh-pages branch"
+
+rm -rf /buildslave/ulakbus.org/zengine
+mv /buildslave/zengine/docs/build/html /buildslave/ulakbus.org/zengine
 echo "zengine docs copied to gh-pages branch"
 
-cp -r /buildslave/pyoko/docs/build/html /buildslave/ulakbus.org/pyoko
+rm -rf /buildslave/ulakbus.org/pyoko
+mv /buildslave/pyoko/docs/build/html /buildslave/ulakbus.org/pyoko
 echo "pyoko docs copied to gh-pages branch"
 
+git status
 git add .
 git commit -m "Buildbot generated docs for humanity, thanks..."
 ../git_push_with_expect.sh $(echo $BUILDBOTGITHUBPASS)
