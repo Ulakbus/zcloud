@@ -13,8 +13,8 @@ EnvironmentFile=/etc/environment
 Restart=on-failure
 ExecStartPre=-/usr/bin/docker kill postgres-buildbot
 ExecStartPre=-/usr/bin/docker rm postgres-buildbot
-ExecStartPre=/usr/bin/docker pull postgres
-ExecStart=/bin/bash -c 'docker run -v /etc/localtime:/etc/localtime:ro  --name postgres-buildbot --hostname %H                -e POSTGRES_PASSWORD=$POSTGRES_PASSWORD  -e POSTGRES_USER=buildbot                -v /mnt/postgres/buildbot:/var/lib/postgresql/data -p 5432:5432 postgres; sleep 3'
+ExecStartPre=/usr/bin/docker pull postgres:9.4
+ExecStart=/bin/bash -c 'docker run -v /etc/localtime:/etc/localtime:ro  --name postgres-buildbot --hostname %H                -e POSTGRES_PASSWORD=$POSTGRES_PASSWORD  -e POSTGRES_USER=buildbot                -v /mnt/postgres/buildbot:/var/lib/postgresql/data -p 5432:5432 postgres:9.4; sleep 3'
 ExecStartPost=/bin/bash -c "sleep 5; etcdctl set /zaerp/envs/POSTGRES_BUILDBOT %H:`docker inspect -f '{{range $p, $conf := .NetworkSettings.Ports}}{{(index $conf 0).HostPort}}{{end}}' postgres-buildbot`;"
 ExecStop=/bin/bash -c "/usr/bin/docker stop postgres-buildbot; etcdctl rm /zaerp/envs/POSTGRES_BUILDBOT;"
 

@@ -13,14 +13,14 @@ EnvironmentFile=/etc/environment
 Restart=on-failure
 ExecStartPre=-/usr/bin/docker kill postgres-zato
 ExecStartPre=-/usr/bin/docker rm postgres-zato
-ExecStartPre=/usr/bin/docker pull postgres
+ExecStartPre=/usr/bin/docker pull postgres:9.4
 
 # start new postgres service
 # add etcd keys after start
 
 ExecStart=/bin/bash -c 'docker run -v /etc/localtime:/etc/localtime:ro  --name postgres-zato --hostname %H \
               -e POSTGRES_PASSWORD=$POSTGRES_PASSWORD  -e POSTGRES_USER=zato \
-              -v /mnt/postgres/zato:/var/lib/postgresql/data -p 5433:5432 postgres; sleep 3'
+              -v /mnt/postgres/zato:/var/lib/postgresql/data -p 5433:5432 postgres:9.4; sleep 3'
 
 ExecStartPost=/bin/bash -c "sleep 5; etcdctl set /zaerp/envs/POSTGRES_ZATO %H:`docker inspect -f '{{range $p, $conf := .NetworkSettings.Ports}}{{(index $conf 0).HostPort}}{{end}}' postgres-zato`;"
 
