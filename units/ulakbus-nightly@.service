@@ -9,6 +9,7 @@ After=docker.service
 TimeoutStartSec=0
 KillMode=none
 EnvironmentFile=/etc/environment
+Environment=DEFAULT_BUCKET_TYPE=nightly_models
 ExecStartPre=-/usr/bin/docker kill ulakbus-nightly-%i
 ExecStartPre=-/usr/bin/docker rm ulakbus-nightly-%i
 ExecStartPre=/usr/bin/docker pull zetaops/ulakbus-nightly
