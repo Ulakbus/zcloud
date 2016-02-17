@@ -13,7 +13,7 @@ Environment=DEFAULT_BUCKET_TYPE=nightly_models
 ExecStartPre=-/usr/bin/docker kill ulakbus-nightly-%i
 ExecStartPre=-/usr/bin/docker rm ulakbus-nightly-%i
 ExecStartPre=/usr/bin/docker pull zetaops/ulakbus-nightly
-ExecStart=/usr/bin/docker run -v /etc/localtime:/etc/localtime:ro --name ulakbus-nightly-%i -e RIAK_SERVER=ulakbus-load-balancer-02.zetaops.local -e RIAK_PROTOCOL=http -e RIAK_PORT=8098 -e REDIS_SERVER=ulakbus-load-balancer-02.zetaops.local:6379 -P zetaops/ulakbus-nightly
+ExecStart=/usr/bin/docker run -v /etc/localtime:/etc/localtime:ro --name ulakbus-nightly-%i -e DEFAULT_BUCKET_TYPE=nightly_models -e RIAK_SERVER=ulakbus-load-balancer-02.zetaops.local -e RIAK_PROTOCOL=http -e RIAK_PORT=8098 -e REDIS_SERVER=ulakbus-load-balancer-02.zetaops.local:6379 -P zetaops/ulakbus-nightly
 ExecStop=/usr/bin/docker stop ulakbus-nightly-%i
 
 [X-Fleet]
