@@ -17,7 +17,7 @@ redmine_project = os.getenv('REDMINE_PROJECT')
 redmine = Redmine(redmine_url, key=redmine_key)
 
 issue = redmine.issue.create(
-	project_id='ulakbus',
+	project_id='aerp',
 	subject='vagrantbox test',
 	tracker_id=2,
 	description='vagrantbox test edilmesi',
