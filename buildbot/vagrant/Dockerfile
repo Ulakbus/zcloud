@@ -13,7 +13,7 @@ RUN mkdir /buildslave && chown buildbot:buildbot /buildslave
 RUN mkdir /home/buildbot && chown buildbot:buildbot /home/buildbot
 RUN chown -R buildbot:buildbot /usr/local/
 USER buildbot
-RUN git config --global user.email "you@example.com"
+RUN git config --global user.email "buildbot@zetaops.io"
 RUN git config --global user.name "Buildbot of ZetaOps"
 RUN git config --global push.default matching
 RUN alias push_vagrantbox='curl "https://atlas.hashicorp.com/ui/tutorial/check?access_token=$ATLAS_TOKEN" && /bin/packer push -name zetaops/ulakbus /buildslave/sourcefiles/template.json'
