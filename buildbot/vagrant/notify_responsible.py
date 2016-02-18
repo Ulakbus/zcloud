@@ -14,6 +14,8 @@ redmine_key = os.environ.get('REDMINE_KEY', None)
 redmine_url = os.environ.get('REDMINE_URL', None)
 redmine_project = os.environ.get('REDMINE_PROJECT', None)
 
+redmine = Redmine(redmine_url, key=redmine_key)
+
 issue = redmine.issue.create(
 	project_id='ulakbus',
 	subject='vagrantbox test',
