@@ -10,9 +10,9 @@ from redmine import Redmine
 import os
 
 __author__ = 'Evren Kutar'
-redmine_key = os.getenv('REDMINE_KEY', None)
-redmine_url = os.getenv('REDMINE_URL', None)
-redmine_project = os.getenv('REDMINE_PROJECT', None)
+redmine_key = os.getenv('REDMINE_KEY')
+redmine_url = os.getenv('REDMINE_URL')
+redmine_project = os.getenv('REDMINE_PROJECT')
 
 redmine = Redmine(redmine_url, key=redmine_key)
 
