@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y \
    wget \
    unzip
 RUN wget -q -O /packer.zip "https://releases.hashicorp.com/packer/0.8.6/packer_0.8.6_linux_amd64.zip" && unzip /packer.zip -d /bin
-RUN pip install twisted==15.2.1 buildbot-slave requests docker-py
+RUN pip install twisted==15.2.1 buildbot-slave requests docker-py python-redmine
 RUN groupadd -r buildbot && useradd -r -g buildbot buildbot
 RUN echo 'buildbot ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 RUN mkdir /buildslave && chown buildbot:buildbot /buildslave
@@ -19,6 +19,7 @@ RUN git config --global push.default matching
 RUN alias push_vagrantbox='curl "https://atlas.hashicorp.com/ui/tutorial/check?access_token=$ATLAS_TOKEN" && /bin/packer push -name zetaops/ulakbus /buildslave/sourcefiles/template.json'
 WORKDIR /buildslave
 COPY vagrant_builder.py /buildslave/
+COPY notify_responsible.py /buildslave/
 COPY buildbot.tac /buildslave/
 #RUN chmod +x create && ./create
 ENTRYPOINT ["/usr/local/bin/buildslave"]
