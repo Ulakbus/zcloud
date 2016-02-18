@@ -1,5 +1,7 @@
 FROM phusion/baseimage:0.9.17
 RUN apt-get update && apt-get install -y \
+   libxml2-dev \
+   libxslt1-dev \
    python-dev \
    python3.4-dev \
    python3-setuptools \
@@ -17,8 +19,8 @@ RUN apt-get update && apt-get install -y \
    tcl8.6-dev \
    tk8.6-dev \
    python-tk
-RUN pip install twisted==15.2.1 buildbot-slave pytest
-RUN pip3 install pytest
+RUN pip install twisted==15.2.1 buildbot-slave pytest lxml
+RUN pip3 install pytest lxml
 RUN easy_install --upgrade six
 RUN easy_install3 --upgrade six
 RUN sed -i "s/encoding = \"ascii\"/encoding = \"utf-8\"/" /usr/lib/python2.7/site.py
