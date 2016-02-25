@@ -1,0 +1,201 @@
+#cloud-config
+# zcloud v03
+users:
+  - name: ali
+    coreos-ssh-import-github: alirizakeles
+coreos:
+  etcd2:
+    # TODO: daha sonra.. https://coreos.com/etcd/docs/latest/clustering.html#dns-discovery
+    # generate a new token for each unique cluster from https://discovery.etcd.io/new?size=3
+    # specify the initial size of your cluster with ?size=X
+    discovery: https://discovery.etcd.io/8d6fea134a15906db1a3ad1c5338ef8b
+    # multi-region and multi-cloud deployments need to use $public_ipv4
+    advertise-client-urls: http://$private_ipv4:2379,http://$private_ipv4:4001
+    initial-advertise-peer-urls: http://$private_ipv4:2380
+    # listen on both the official ports and the legacy ports
+    # legacy ports can be omitted if your application doesn't depend on them
+    listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
+    listen-peer-urls: http://$private_ipv4:2380
+    name: app-02
+    snapshot-count: 5000
+  fleet:
+    public-ip: $private_ipv4   # used for fleetctl ssh command
+    metadata: project=ulakbus,disk=sata,machine=app-02
+  flannel:
+    interface: $private_ipv4
+  units:
+    - name: etcd2.service
+      drop-ins:
+        - name: timeout.conf
+          content: |
+            [Service]
+            TimeoutStartSec=0
+      command: start
+    - name: fleet.socket
+      command: start
+      drop-ins:
+      - name: 30-ListenStream.conf
+        content: |
+          [Socket]
+          ListenStream=49153
+    - name: fleet.service
+      command: start
+    - name: flanneld.service
+      drop-ins:
+        - name: 50-network-config.conf
+          content: |
+            [Service]
+            ExecStartPre=/usr/bin/etcdctl set /coreos.com/network/config '{ "Network": "172.17.0.0/16" }'
+      command: start
+
+    - name: systemd-resolved-restart.service
+      command: start
+      content: |
+        [Unit]
+        Description=Set private DNS
+
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/bin/systemctl restart systemd-resolved
+
+    - name: settimezone.service
+      # timezone settings. ntp use coreos default pools, just tune timezone
+      # https://coreos.com/docs/cluster-management/setup/configuring-date-and-timezone/
+      command: start
+      content: |
+        [Unit]
+        Description=Set the timezone
+
+        [Service]
+        ExecStart=/usr/bin/timedatectl set-timezone Europe/Istanbul
+        RemainAfterExit=yes
+        Type=oneshot
+
+    - name: consul.service
+      command: start
+      content: |
+        [Unit]
+        Description=Consul
+        Documentation=https://github.com/zetaops/zcloud/blob/master/docs/consul-service.md
+        Requires=docker.service
+        Requires=flanneld.service
+        Requires=etcd2.service
+        After=etcd2.service
+        After=flanneld.service
+        After=docker.service
+        Requires=set-hostname.service
+        After=set-hostname.service
+
+        [Service]
+        TimeoutStartSec=0
+        Restart=always
+        KillMode=none
+        EnvironmentFile=/etc/environment
+        Environment=DOCKER_REPO=quay.io/democracyworks/consul-coreos
+        Environment=VERSION=2015041102
+        Environment=CONTAINER=consul
+        ExecStartPre=-/usr/bin/docker kill ${CONTAINER}
+        ExecStartPre=-/usr/bin/docker rm ${CONTAINER}
+        ExecStartPre=/usr/bin/docker pull ${DOCKER_REPO}:${VERSION}
+        ExecStartPre=/usr/bin/docker pull cap10morgan/conntrack
+        ExecStartPre=/usr/bin/docker run --net=host --privileged --rm cap10morgan/conntrack -F
+
+        ExecStart=/bin/bash -c 'docker run --name ${CONTAINER} --restart=always \
+          --volume /var/run/docker.sock:/var/run/docker.sock --hostname %H \
+          -p 8300:8300 -p 8301:8301 -p 8301:8301/udp -p 8302:8302 -p 8302:8302/udp \
+          -p 8400:8400 -p 8500:8500 -p 8600:53/udp \
+          ${DOCKER_REPO}:${VERSION} ${COREOS_PRIVATE_IPV4} %m'
+
+        ExecStop=/usr/bin/docker stop ${CONTAINER}
+        ExecStopPost=-/usr/bin/etcdctl rm /consul.io/bootstrap/machines/%m
+
+    - name: registrator2etcd.service
+      command: start
+      content: |
+        [Unit]
+        Description=Registrator to Etcd
+        After=etcd2.service
+        Requires=etcd2.service
+        After=docker.service
+        Requires=docker.service
+        After=flanneld.service
+        Requires=flanneld.service
+        Requires=set-hostname.service
+        After=set-hostname.service
+
+        [Service]
+        TimeoutStartSec=0
+        EnvironmentFile=/etc/environment
+        Restart=on-failure
+
+        ExecStartPre=-/usr/bin/docker kill registrator-etcd
+        ExecStartPre=-/usr/bin/docker rm registrator-etcd
+        ExecStartPre=/usr/bin/docker pull gliderlabs/registrator:master
+
+        ExecStart=/bin/bash -c 'docker run --name registrator-etcd --hostname %H \
+          -v /var/run/docker.sock:/tmp/docker.sock gliderlabs/registrator:master \
+          -resync 320 -ttl 60 -ttl-refresh 50 etcd://${COREOS_PRIVATE_IPV4}:4001/services'
+
+        ExecStop=/usr/bin/docker stop registrator-etcd
+
+    - name: registrator2consul.service
+      command: start
+      content: |
+        [Unit]
+        Description=Registrator Consul
+        Documentation=https://github.com/zetaops/zcloud/blob/master/docs/registrator2consul-service.md
+        After=consul.service
+        Requires=consul.service
+        After=etcd2.service
+        Requires=etcd2.service
+        After=docker.service
+        Requires=docker.service
+        After=flanneld.service
+        Requires=flanneld.service
+        Requires=set-hostname.service
+        After=set-hostname.service
+
+        [Service]
+        TimeoutStartSec=0
+        EnvironmentFile=/etc/environment
+        Restart=on-failure
+
+        ExecStartPre=-/usr/bin/docker kill registrator-consul
+        ExecStartPre=-/usr/bin/docker rm registrator-consul
+        ExecStartPre=/usr/bin/docker pull gliderlabs/registrator:master
+
+        ExecStart=/bin/bash -c 'docker run --name registrator-consul --hostname %H \
+          -v /var/run/docker.sock:/tmp/docker.sock gliderlabs/registrator:master  \
+          -resync 320 -ttl 60 -ttl-refresh 50 consul://${COREOS_PRIVATE_IPV4}:8500'
+
+        ExecStop=/usr/bin/docker stop registrator-consul
+
+    - name: mnt-data.mount
+      command: start
+      content: |
+        [Unit]
+        Description=Mount to /mnt/data
+        [Mount]
+        What=/dev/vdb1
+        Where=/mnt/data
+        Type=ext4
+
+    - name: set-hostname.service
+      command: start
+      content: |
+        [Unit]
+        Description=Set hostname using hostnamectl as you wish
+
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/bin/hostnamectl set-hostname ulakbus-app-02.zetaops.local
+
+
+write_files:
+  - path: /etc/systemd/resolved.conf.d/00-zetaops-local-dns.conf
+    permissions: 0644
+    owner: root
+    content: |
+      # private dns servers for local domain
+      [Resolve]
+      DNS=10.61.31.68 10.61.31.67
