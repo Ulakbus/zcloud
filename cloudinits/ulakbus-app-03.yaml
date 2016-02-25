@@ -134,7 +134,7 @@ coreos:
 
         ExecStart=/bin/bash -c 'docker run --name registrator-etcd --hostname %H \
           -v /var/run/docker.sock:/tmp/docker.sock gliderlabs/registrator:master \
-          -resync 320 -ttl 60 -ttl-refresh 50 etcd://${COREOS_PRIVATE_IPV4}:4001/services'
+          -ip ${COREOS_PRIVATE_IPV4} -resync 320 -ttl 60 -ttl-refresh 50 etcd://${COREOS_PRIVATE_IPV4}:4001/services'
 
         ExecStop=/usr/bin/docker stop registrator-etcd
 
@@ -166,7 +166,7 @@ coreos:
 
         ExecStart=/bin/bash -c 'docker run --name registrator-consul --hostname %H \
           -v /var/run/docker.sock:/tmp/docker.sock gliderlabs/registrator:master  \
-          -resync 320 -ttl 60 -ttl-refresh 50 consul://${COREOS_PRIVATE_IPV4}:8500'
+          -ip ${COREOS_PRIVATE_IPV4} -resync 320 -ttl 60 -ttl-refresh 50 consul://${COREOS_PRIVATE_IPV4}:8500'
 
         ExecStop=/usr/bin/docker stop registrator-consul
 

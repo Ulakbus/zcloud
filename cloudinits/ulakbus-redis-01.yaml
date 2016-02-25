@@ -16,11 +16,11 @@ coreos:
     # legacy ports can be omitted if your application doesn't depend on them
     listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
     listen-peer-urls: http://$private_ipv4:2380
-    name: app-03
+    name: redis-01
     snapshot-count: 5000
   fleet:
     public-ip: $private_ipv4   # used for fleetctl ssh command
-    metadata: project=ulakbus,disk=sata,machine=app-03
+    metadata: project=ulakbus,disk=sata,machine=redis-01
   flannel:
     interface: $private_ipv4
   units:
@@ -134,7 +134,7 @@ coreos:
 
         ExecStart=/bin/bash -c 'docker run --name registrator-etcd --hostname %H \
           -v /var/run/docker.sock:/tmp/docker.sock gliderlabs/registrator:master \
-          -resync 320 -ttl 60 -ttl-refresh 50 etcd://${COREOS_PRIVATE_IPV4}:4001/services'
+          -ip ${COREOS_PRIVATE_IPV4} -resync 320 -ttl 60 -ttl-refresh 50 etcd://${COREOS_PRIVATE_IPV4}:4001/services'
 
         ExecStop=/usr/bin/docker stop registrator-etcd
 
@@ -166,19 +166,9 @@ coreos:
 
         ExecStart=/bin/bash -c 'docker run --name registrator-consul --hostname %H \
           -v /var/run/docker.sock:/tmp/docker.sock gliderlabs/registrator:master  \
-          -resync 320 -ttl 60 -ttl-refresh 50 consul://${COREOS_PRIVATE_IPV4}:8500'
+          -ip ${COREOS_PRIVATE_IPV4} -resync 320 -ttl 60 -ttl-refresh 50 consul://${COREOS_PRIVATE_IPV4}:8500'
 
         ExecStop=/usr/bin/docker stop registrator-consul
-
-    - name: mnt-data.mount
-      command: start
-      content: |
-        [Unit]
-        Description=Mount to /mnt/data
-        [Mount]
-        What=/dev/vdb1
-        Where=/mnt/data
-        Type=ext4
 
     - name: set-hostname.service
       command: start
@@ -188,7 +178,7 @@ coreos:
 
         [Service]
         Type=oneshot
-        ExecStart=/usr/bin/hostnamectl set-hostname ulakbus-app-03.zetaops.local
+        ExecStart=/usr/bin/hostnamectl set-hostname ulakbus-redis-01.zetaops.local
 
 
 write_files:
@@ -199,3 +189,101 @@ write_files:
       # private dns servers for local domain
       [Resolve]
       DNS=10.61.31.68 10.61.31.67
+
+  - path: /home/core/bin/redis_cluster.sh
+    permissions: 0755
+    owner: core
+    content: |
+      #!/bin/bash
+      # Walk through etcd keys including redis in /services directory
+      # we are not interested in container's ip address, we can discover service just with hostname and hostport
+      # hostname is part of key /services/redis/redis-t.c.zetaops-academic-erp.internal:redis_t:6379
+      # hostport is part of value 172.17.0.3:49154
+      # as registrator2etcd write service informations
+      # first check masters, if exists a master, update etcd and make rest ones slave of this one.
+      # check if exists masterless redises, then make one of it master and others slave of new master
+      # elseif no redis remove etcd key
+
+      make_master(){
+          EXEC="docker run --name redis-cli --rm --env IP=\"$1\" --env PORT=\"$2\" redis sh -c 'exec redis-cli -h \$IP -p \$PORT slaveof no one'"
+          echo $EXEC # just for logs in journalctl
+          eval $EXEC
+      }
+
+      make_slave(){
+          EXEC="docker run --name redis-cli --rm --env IP=\"$1\" --env PORT=\"$2\" redis sh -c 'exec redis-cli -h \$IP -p \$PORT slaveof $3 $4'"
+          echo $EXEC # just for logs in journalctl
+          eval $EXEC
+      }
+
+      e=0; f=0
+      for i in $(etcdctl ls /services/redis); do
+              KEY=$(etcdctl ls $i)
+              arrKEY=( ${KEY//\// } )
+              arrHOST=(${arrKEY[2]//:/ })
+              REDIS_HOST=${arrHOST[0]}
+
+              REDIS_IP_PORT=$(etcdctl get $i);
+              arrIP=(${REDIS_IP_PORT//:/ })
+              REDIS_PORT=${arrIP[1]}
+              RET=$(docker run --name redis-check-master --rm --env IP=$REDIS_HOST --env PORT=$REDIS_PORT redis sh -c 'exec redis-cli -h $IP -p $PORT info replication' 2> /dev/null | grep "role:" | tr -d '[[:space:]]')
+              #echo $RET
+              if [ "$RET" ==  "role:master" ]; then
+                  MASTERS[$e]="$REDIS_HOST $REDIS_PORT"
+                  e+=1
+              elif [ "$RET" == "role:slave" ]; then
+                  SLAVES[$f]="$REDIS_HOST $REDIS_PORT"
+                  f+=1
+              else
+                  echo 'no redis'
+              fi
+      done
+
+      if [ "${#MASTERS[@]}" -gt  0 ]; then # master var..
+         MASTER="${MASTERS[0]}" # sifirinci tek master olsun..
+         if [ "${#MASTERS[@]}" -gt  1 ]; then # birden cok master varsa sonrakileri slave yap...
+             for (( i = 1; i < ${#MASTERS[@]}; i++ )); do
+               arrMASTER=($MASTER)
+               arrMAS=( ${MASTERS[$i]} )
+                     make_slave "${arrMASTER[0]}" "${arrMASTER[1]}" "${arrMAS[0]}" "${arrMAS[1]}"
+             done
+         fi
+      fi
+
+
+      if [ "${#SLAVES[@]}" -gt  0 ]; then # slave var..
+          if [ -z "$MASTER" ]; then # hala master yoksa
+              MASTER="${SLAVES[0]}" # sifirinci slave master olsun
+              arrMAS=($MASTER)
+              make_master "${arrMAS[0]}" "${arrMAS[1]}"
+
+             for (( i = 1; i < ${#SLAVES[@]}; i++ )); do
+                     arrSLA=( ${SLAVES[$i]} )
+                     make_slave "${arrSLA[0]}" "${arrSLA[1]}" "${arrMAS[0]}" "${arrMAS[1]}"
+             done
+
+
+          else #master varsa butun slavelerin masteri olsun
+             for (( i = 0; i < ${#SLAVES[@]}; i++ )); do
+                     arrMASTER=($MASTER)
+                     arrSLA=( ${SLAVES[$i]} )
+                     make_slave "${arrSLA[0]}" "${arrSLA[1]}" "${arrMASTER[0]}" "${arrMASTER[1]}"
+             done
+          fi
+      fi
+
+      if [ -n "$MASTER" ]; then
+          export REDIS_MASTER="$MASTER"
+          etcdctl mkdir /zaerp/envs
+          RR=$(etcdctl get /zaerp/envs/REDIS_MASTER)
+          if [ -n "$RR" ]; then
+              etcdctl update /zaerp/envs/REDIS_MASTER "$MASTER"
+          else
+              etcdctl set /zaerp/envs/REDIS_MASTER "$MASTER"
+          fi
+      else
+          export REDIS_MASTER=""
+          etcdctl mkdir /zaerp/envs
+          etcdctl rm /zaerp/envs/REDIS_MASTER
+          echo "Hic master yok, hic redis de yok"
+      fi

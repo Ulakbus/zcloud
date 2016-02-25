@@ -4,18 +4,32 @@ users:
   - name: ali
     coreos-ssh-import-github: alirizakeles
 coreos:
-  etcd:
+  etcd2:
+    # TODO: daha sonra.. https://coreos.com/etcd/docs/latest/clustering.html#dns-discovery
+    # generate a new token for each unique cluster from https://discovery.etcd.io/new?size=3
+    # specify the initial size of your cluster with ?size=X
+    discovery: https://discovery.etcd.io/8d6fea134a15906db1a3ad1c5338ef8b
+    # multi-region and multi-cloud deployments need to use $public_ipv4
+    advertise-client-urls: http://$private_ipv4:2379,http://$private_ipv4:4001
+    initial-advertise-peer-urls: http://$private_ipv4:2380
+    # listen on both the official ports and the legacy ports
+    # legacy ports can be omitted if your application doesn't depend on them
+    listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
+    listen-peer-urls: http://$private_ipv4:2380
     name: control-center
-    discovery: https://discovery.etcd.io/9d3d9e213743b5e1caa2e40a915031b4
-    addr: $private_ipv4:4001
-    peer-addr: $private_ipv4:7001
+    snapshot-count: 5000
   fleet:
     public-ip: $private_ipv4   # used for fleetctl ssh command
     metadata: project=ulakbus,disk=sata,machine=control-center
   flannel:
     interface: $private_ipv4
   units:
-    - name: etcd.service
+    - name: etcd2.service
+      drop-ins:
+        - name: timeout.conf
+          content: |
+            [Service]
+            TimeoutStartSec=0
       command: start
     - name: fleet.socket
       command: start
@@ -34,6 +48,16 @@ coreos:
             ExecStartPre=/usr/bin/etcdctl set /coreos.com/network/config '{ "Network": "172.17.0.0/16" }'
       command: start
 
+    - name: systemd-resolved-restart.service
+      command: start
+      content: |
+        [Unit]
+        Description=Set private DNS
+
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/bin/systemctl restart systemd-resolved
+
     - name: settimezone.service
       # timezone settings. ntp use coreos default pools, just tune timezone
       # https://coreos.com/docs/cluster-management/setup/configuring-date-and-timezone/
@@ -47,21 +71,6 @@ coreos:
         RemainAfterExit=yes
         Type=oneshot
 
-    - name: reconfigure-hostname.service
-      # timezone settings. ntp use coreos default pools, just tune timezone
-      # https://coreos.com/docs/cluster-management/setup/configuring-date-and-timezone/
-      command: start
-      content: |
-        [Unit]
-        Description=Set hostname using hostnamectl as you wish
-
-        [Service]
-        Type=oneshot
-        ExecStart=/usr/bin/hostnamectl set-hostname ulakbus-app-03.zetaops.local
-
-        [Install]
-        WantedBy=local.target
-
     - name: consul.service
       command: start
       content: |
@@ -70,8 +79,8 @@ coreos:
         Documentation=https://github.com/zetaops/zcloud/blob/master/docs/consul-service.md
         Requires=docker.service
         Requires=flanneld.service
-        Requires=etcd.service
-        After=etcd.service
+        Requires=etcd2.service
+        After=etcd2.service
         After=flanneld.service
         After=docker.service
         Requires=set-hostname.service
@@ -105,8 +114,8 @@ coreos:
       content: |
         [Unit]
         Description=Registrator to Etcd
-        After=etcd.service
-        Requires=etcd.service
+        After=etcd2.service
+        Requires=etcd2.service
         After=docker.service
         Requires=docker.service
         After=flanneld.service
@@ -121,11 +130,11 @@ coreos:
 
         ExecStartPre=-/usr/bin/docker kill registrator-etcd
         ExecStartPre=-/usr/bin/docker rm registrator-etcd
-        ExecStartPre=/usr/bin/docker pull gliderlabs/registrator:latest
+        ExecStartPre=/usr/bin/docker pull gliderlabs/registrator:master
 
         ExecStart=/bin/bash -c 'docker run --name registrator-etcd --hostname %H \
-          -v /var/run/docker.sock:/tmp/docker.sock gliderlabs/registrator:latest \
-          etcd://${COREOS_PRIVATE_IPV4}:4001/services'
+          -v /var/run/docker.sock:/tmp/docker.sock gliderlabs/registrator:master \
+          -ip ${COREOS_PRIVATE_IPV4} -resync 320 -ttl 60 -ttl-refresh 50 etcd://${COREOS_PRIVATE_IPV4}:4001/services'
 
         ExecStop=/usr/bin/docker stop registrator-etcd
 
@@ -137,8 +146,8 @@ coreos:
         Documentation=https://github.com/zetaops/zcloud/blob/master/docs/registrator2consul-service.md
         After=consul.service
         Requires=consul.service
-        After=etcd.service
-        Requires=etcd.service
+        After=etcd2.service
+        Requires=etcd2.service
         After=docker.service
         Requires=docker.service
         After=flanneld.service
@@ -153,11 +162,11 @@ coreos:
 
         ExecStartPre=-/usr/bin/docker kill registrator-consul
         ExecStartPre=-/usr/bin/docker rm registrator-consul
-        ExecStartPre=/usr/bin/docker pull gliderlabs/registrator:latest
+        ExecStartPre=/usr/bin/docker pull gliderlabs/registrator:master
 
         ExecStart=/bin/bash -c 'docker run --name registrator-consul --hostname %H \
-          -v /var/run/docker.sock:/tmp/docker.sock gliderlabs/registrator:latest  \
-          consul://${COREOS_PRIVATE_IPV4}:8500'
+          -v /var/run/docker.sock:/tmp/docker.sock gliderlabs/registrator:master  \
+          -ip ${COREOS_PRIVATE_IPV4} -resync 320 -ttl 60 -ttl-refresh 50 consul://${COREOS_PRIVATE_IPV4}:8500'
 
         ExecStop=/usr/bin/docker stop registrator-consul
 
@@ -171,16 +180,6 @@ coreos:
         Where=/mnt/data
         Type=ext4
 
-    - name: systemd-resolved-restart.service
-      command: start
-      content: |
-        [Unit]
-        Description=Set private DNS
-
-        [Service]
-        Type=oneshot
-        ExecStart=/usr/bin/systemctl restart systemd-resolved
-
     - name: set-hostname.service
       command: start
       content: |
@@ -190,26 +189,6 @@ coreos:
         [Service]
         Type=oneshot
         ExecStart=/usr/bin/hostnamectl set-hostname ulakbus-control-center.zetaops.local
-
-    - name: logspout.service
-      command: start
-      content: |
-        [Unit]
-        Description=Logspout service
-
-        Requires=docker.service
-        After=docker.service
-
-        [Service]
-        TimeoutStartSec=0
-        EnvironmentFile=/etc/environment
-
-        ExecStartPre=-/usr/bin/docker kill logspout
-        ExecStartPre=-/usr/bin/docker rm logspout
-        ExecStartPre=/usr/bin/docker pull gliderlabs/logspout
-
-        ExecStart=/bin/bash -c '/usr/bin/docker run -v /etc/localtime:/etc/localtime:ro -e SYSLOG_FORMAT=rfc3164 --name logspout --volume=/var/run/docker.sock:/tmp/docker.sock gliderlabs/logspout syslog://ulakbus-logging-01.zetaops.local:5006'
-        ExecStop=/usr/bin/docker stop logspout
 
 
 write_files:

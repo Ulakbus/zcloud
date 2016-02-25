@@ -16,11 +16,11 @@ coreos:
     # legacy ports can be omitted if your application doesn't depend on them
     listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
     listen-peer-urls: http://$private_ipv4:2380
-    name: lb-01
+    name: lb-02
     snapshot-count: 5000
   fleet:
     public-ip: $private_ipv4   # used for fleetctl ssh command
-    metadata: project=ulakbus,disk=sata,machine=lb-01
+    metadata: project=ulakbus,disk=sata,machine=lb-02
   flannel:
     interface: $private_ipv4
   units:
@@ -134,7 +134,7 @@ coreos:
 
         ExecStart=/bin/bash -c 'docker run --name registrator-etcd --hostname %H \
           -v /var/run/docker.sock:/tmp/docker.sock gliderlabs/registrator:master \
-          -resync 320 -ttl 60 -ttl-refresh 50 etcd://${COREOS_PRIVATE_IPV4}:4001/services'
+          -ip ${COREOS_PRIVATE_IPV4} -resync 320 -ttl 60 -ttl-refresh 50 etcd://${COREOS_PRIVATE_IPV4}:4001/services'
 
         ExecStop=/usr/bin/docker stop registrator-etcd
 
@@ -166,7 +166,7 @@ coreos:
 
         ExecStart=/bin/bash -c 'docker run --name registrator-consul --hostname %H \
           -v /var/run/docker.sock:/tmp/docker.sock gliderlabs/registrator:master  \
-          -resync 320 -ttl 60 -ttl-refresh 50 consul://${COREOS_PRIVATE_IPV4}:8500'
+          -ip ${COREOS_PRIVATE_IPV4} -resync 320 -ttl 60 -ttl-refresh 50 consul://${COREOS_PRIVATE_IPV4}:8500'
 
         ExecStop=/usr/bin/docker stop registrator-consul
 
@@ -188,7 +188,7 @@ coreos:
 
         [Service]
         Type=oneshot
-        ExecStart=/usr/bin/hostnamectl set-hostname ulakbus-lb-01.zetaops.local
+        ExecStart=/usr/bin/hostnamectl set-hostname ulakbus-lb-02.zetaops.local
 
 
 write_files:
