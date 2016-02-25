@@ -207,9 +207,9 @@ output:
 
 
   ### Logstash as output
-  #logstash:
+  logstash:
     # The Logstash hosts
-    #hosts: ["localhost:5044"]
+    hosts: [LOGSTASH_HOST]
 
     # Number of workers per Logstash host.
     #worker: 1
@@ -220,7 +220,7 @@ output:
     # Optional index name. The default index name depends on the each beat.
     # For Packetbeat, the default is set to packetbeat, for Topbeat
     # top topbeat and for Filebeat to filebeat.
-    #index: filebeat
+    index: log
 
     # Optional TLS. By default is off.
     #tls:
@@ -276,7 +276,7 @@ shipper:
   # The name of the shipper that publishes the network data. It can be used to group
   # all the transactions sent by a single shipper in the web interface.
   # If this options is not defined, the hostname is used.
-  #name:
+  name: filebeat
 
   # The tags of the shipper are included in their own field with each
   # transaction published. Tags make it easy to group servers by different

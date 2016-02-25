@@ -12,6 +12,9 @@ RUN echo "deb https://packages.elastic.co/beats/apt stable main" | tee -a /etc/a
 RUN apt-get -y update
 RUN apt-get -y install filebeat
 
-ADD filebeat.yml /etc/filebeat/filebeat.yml
+ADD filebeat.yml /filebeat.yml
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 
-ENTRYPOINT ["/usr/bin/filebeat", "-e", "-v", "-c", "/etc/filebeat/filebeat.yml"]
+ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["/usr/bin/filebeat", "-e", "-v", "-c", "/filebeat.yml"]
