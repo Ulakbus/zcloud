@@ -190,7 +190,7 @@ coreos:
         ExecStartPre=-/usr/bin/docker rm filebeat
         ExecStartPre=/usr/bin/docker pull zetaops/filebeat
 
-        ExecStart=/bin/bash -c '/usr/bin/docker run -v /etc/localtime:/etc/localtime:ro --name=filebeat -e "LOGSTASH_HOST=IP1,IP2" -e "INDEX=logstash" -v /var/lib/docker:/var/lib/docker  zetaops/filebeat' 
+        ExecStart=/bin/bash -c '/usr/bin/docker run -v /etc/localtime:/etc/localtime:ro --name=filebeat -e "LOGSTASH_HOST=LOGSTASH_1,LOGSTASH_2" -e "INDEX=logstash" -v /var/lib/docker:/var/lib/docker  zetaops/filebeat' 
         ExecStop=/usr/bin/docker stop filebeat
 
 
