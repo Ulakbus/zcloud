@@ -1,8 +1,8 @@
 [Unit]
 Description=ulakbus
-Requires=etcd.service
+Requires=etcd2.service
 Requires=docker.service
-After=etcd.service
+After=etcd2.service
 After=docker.service
 
 [Service]
@@ -12,8 +12,13 @@ EnvironmentFile=/etc/environment
 ExecStartPre=-/usr/bin/docker kill ulakbus-%i
 ExecStartPre=-/usr/bin/docker rm ulakbus-%i
 ExecStartPre=/usr/bin/docker pull zetaops/ulakbus
-ExecStart=/bin/bash -c '/usr/bin/docker run -v /etc/localtime:/etc/localtime:ro --name ulakbus-%i -e S3_ACCESS_KEY=$(etcdctl get /zaerp/envs/S3_ACCESS_KEY) -e S3_SECRET_KEY=$(etcdctl get /zaerp/envs/S3_SECRET_KEY) -e RIAK_SERVER=ulakbus-load-balancer-02.zetaops.local -e RIAK_PROTOCOL=http -e RIAK_PORT=8098 -e REDIS_SERVER=ulakbus-load-balancer-02.zetaops.local:6379 -P zetaops/ulakbus'
+ExecStart=/bin/bash -c '/usr/bin/docker run -v /etc/localtime:/etc/localtime:ro --name ulakbus-%i -e S3_ACCESS_KEY=$(etcdctl get /zaerp/envs/S3_ACCESS_KEY) -e S3_SECRET_KEY=$(etcdctl get /zaerp/envs/S3_SECRET_KEY) -e RIAK_SERVER=ulakbus-bl-02.zetaops.local -e RIAK_PROTOCOL=http -e RIAK_PORT=8098 -e REDIS_SERVER=ulakbus-lb-02.zetaops.local:6379 -P zetaops/ulakbus'
 ExecStop=/usr/bin/docker stop ulakbus-%i
 
 [X-Fleet]
-MachineMetadata=machineof=app
+MachineMetadata=machine=app-01
+MachineMetadata=machine=app-02
+MachineMetadata=machine=app-03
+MachineMetadata=machine=app-07
+MachineMetadata=machine=app-08
+MachineMetadata=machine=app-09

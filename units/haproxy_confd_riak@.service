@@ -1,6 +1,5 @@
 [Unit]
 Description=Confd with haproxy
-Documentation=https://github.com/zetaops/zcloud/blob/master/docs/registrator2consul-service.md
 
 [Service]
 TimeoutStartSec=3min
@@ -15,4 +14,4 @@ ExecStop=/usr/bin/docker stop haproxy-confd-riak
 
 [X-Fleet]
 Conflicts=haproxy_confd_riak@*.service
-MachineMetadata=machineof=lb
+MachineMetadata=machine=lb-0%i

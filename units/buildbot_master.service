@@ -13,5 +13,8 @@ ExecStart=/bin/bash -c '/usr/bin/docker run -v /etc/localtime:/etc/localtime:ro 
 ExecStop=/usr/bin/docker stop buildbot-master
 
 [X-Fleet]
-MachineMetadata=machineof=app
-Conflicts=buildbot_master@service
+MachineMetadata=machine=app-01
+MachineMetadata=machine=app-02
+MachineMetadata=machine=app-03
+MachineMetadata=machine=app-07
+Conflicts=buildbot_master.service

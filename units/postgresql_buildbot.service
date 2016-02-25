@@ -1,10 +1,9 @@
 [Unit]
 Description=Postgres Zato
-Documentation=https://github.com/zetaops/zcloud/blob/master/docs/redis-service.md
 After=docker.service
 Requires=docker.service
-After=etcd.service
-Requires=etcd.service
+After=etcd2.service
+Requires=etcd2.service
 
 [Service]
 TimeoutStartSec=3min
@@ -19,6 +18,5 @@ ExecStartPost=/bin/bash -c "sleep 5; etcdctl set /zaerp/envs/POSTGRES_BUILDBOT %
 ExecStop=/bin/bash -c "/usr/bin/docker stop postgres-buildbot; etcdctl rm /zaerp/envs/POSTGRES_BUILDBOT;"
 
 [X-Fleet]
-Conflicts=postgresql.service
-MachineMetadata=machineof=redis
-MachineMetadata=postgres=true
+Conflicts=postgresql_buildbot.service
+MachineMetadata=machine=app-07

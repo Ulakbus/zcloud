@@ -1,10 +1,9 @@
 [Unit]
 Description=Redis
-Documentation=https://github.com/zetaops/zcloud/blob/master/docs/redis-service.md
 After=docker.service
 Requires=docker.service
-After=etcd.service
-Requires=etcd.service
+After=etcd2.service
+Requires=etcd2.service
 
 [Service]
 TimeoutStartSec=3min
@@ -28,8 +27,8 @@ ExecStart=/bin/bash -c 'MAS=`etcdctl get /zaerp/envs/REDIS_MASTER`; \
                         fi'
 
 ExecStop=/usr/bin/docker stop redis-%i
-
+ExecStopPost=/bin/bash /home/core/bin/redis_cluster.sh
 
 [X-Fleet]
-MachineMetadata=machineof=redis
+MachineMetadata=redis=true
 Conflicts=redis_cluster@*.service

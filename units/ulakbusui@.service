@@ -1,8 +1,8 @@
 [Unit]
 Description=ulakbus-ui
-Requires=etcd.service
+Requires=etcd2.service
 Requires=docker.service
-After=etcd.service
+After=etcd2.service
 After=docker.service
 
 [Service]
@@ -16,4 +16,9 @@ ExecStart=/usr/bin/docker run --name ulakbusui-%i -v /etc/localtime:/etc/localti
 ExecStop=/usr/bin/docker stop ulakbusui-%i
 
 [X-Fleet]
-MachineMetadata=machineof=app
+MachineMetadata=machine=app-01
+MachineMetadata=machine=app-02
+MachineMetadata=machine=app-03
+MachineMetadata=machine=app-07
+MachineMetadata=machine=app-08
+MachineMetadata=machine=app-09

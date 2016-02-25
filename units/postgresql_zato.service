@@ -1,10 +1,9 @@
 [Unit]
 Description=Postgres Zato
-Documentation=https://github.com/zetaops/zcloud/blob/master/docs/redis-service.md
 After=docker.service
 Requires=docker.service
-After=etcd.service
-Requires=etcd.service
+After=etcd2.service
+Requires=etcd2.service
 
 [Service]
 TimeoutStartSec=3min
@@ -29,4 +28,4 @@ ExecStop=/bin/bash -c "/usr/bin/docker stop postgres-zato; etcdctl rm /zaerp/env
 [X-Fleet]
 Conflicts=postgresql_zato.service
 # open this service only postgres machine
-MachineMetadata=postgres=true
+MachineMetadata=machine=app-07
