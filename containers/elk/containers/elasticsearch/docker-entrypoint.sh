@@ -17,6 +17,11 @@ if [ "$1" = 'elasticsearch' -a "$(id -u)" = '0' ]; then
 	#exec gosu elasticsearch "$BASH_SOURCE" "$@"
 fi
 
+
+cat /usr/share/elasticsearch/config/elasticsearch.yml | sed "s/ES_NODE_2/$ES_NODE_2/" > /usr/share/elasticsearch/config/elasticsearch.yml.tmp
+cat /usr/share/elasticsearch/config/elasticsearch.yml.tmp > /usr/share/elasticsearch/config/elasticsearch.yml 
+rm /usr/share/elasticsearch/config/elasticsearch.yml.tmp
+
 # As argument is not related to elasticsearch,
 # then assume that user wants to run his own process,
 # for example a `bash` shell to explore this image

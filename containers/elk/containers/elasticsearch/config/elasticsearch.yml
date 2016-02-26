@@ -1,1 +1,2 @@
-network.host: "0.0.0.0"
+#network.host: "0.0.0.0"
+discovery.zen.ping.unicast.hosts: [ES_NODE_2]
