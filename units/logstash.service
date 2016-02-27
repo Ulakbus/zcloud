@@ -12,7 +12,7 @@ ExecStartPre=-/usr/bin/docker kill logstash
 ExecStartPre=-/usr/bin/docker rm logstash
 ExecStartPre=/usr/bin/docker pull zetaops/logstash
 
-ExecStart=/bin/bash -c '/usr/bin/docker run -v /etc/localtime:/etc/localtime:ro -p 5044:5044 --name=logstash zetaops/logstash'
+ExecStart=/bin/bash -c '/usr/bin/docker run -v /etc/localtime:/etc/localtime:ro -e "ES_HOST=ES_NODE_HOST_IP" -p 5044:5044 --name=logstash zetaops/logstash'
 ExecStop=/usr/bin/docker stop logstash
 
 [X-Fleet]
