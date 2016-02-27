@@ -1,0 +1,20 @@
+[Unit]
+Description=Kibana service
+
+Requires=docker.service
+After=docker.service
+
+[Service]
+TimeoutStartSec=0
+EnvironmentFile=/etc/environment
+
+ExecStartPre=-/usr/bin/docker kill kibana
+ExecStartPre=-/usr/bin/docker rm kibana
+ExecStartPre=/usr/bin/docker pull kibana
+
+ExecStart=/bin/bash -c '/usr/bin/docker run -v /etc/localtime:/etc/localtime:ro --name=kibana -e ELASTICSEARCH_URL=ETCD_ES_NODE_IP -p 5601:5601 -d kibana'
+ExecStop=/usr/bin/docker stop kibana
+
+[X-Fleet]
+Conflicts=kibana.service
+MachineMetadata=

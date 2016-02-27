@@ -1,0 +1,20 @@
+[Unit]
+Description=Elasticsearch service
+
+Requires=docker.service
+After=docker.service
+
+[Service]
+TimeoutStartSec=0
+EnvironmentFile=/etc/environment
+
+ExecStartPre=-/usr/bin/docker kill elasticsearch
+ExecStartPre=-/usr/bin/docker rm elasticsearch
+ExecStartPre=/usr/bin/docker pull zetaops/elasticsearch
+
+ExecStart=/bin/bash -c '/usr/bin/docker run -v /etc/localtime:/etc/localtime:ro -p 9200:9200 -p 9300:9300 --name=elasticsearch -e "ES_NODE_2=ETCD_OTHER_HOST_IP" zetaops/elasticsearch elasticsearch -Des.cluster.name="zetaops"'
+ExecStop=/usr/bin/docker stop elasticsearch
+
+[X-Fleet]
+Conflicts=elasticsearch.service
+MachineMetadata=
