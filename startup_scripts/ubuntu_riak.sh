@@ -14,9 +14,9 @@ IP_ADDRESS=$(/sbin/ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | awk '{ prin
 # set hostname ip adress
 echo "$IP_ADDRESS  $(hostname).$DOMAIN  $(hostname)" >> /etc/hosts
 
-echo "search $DOMAIN" >> etc/resolvconf/resolv.conf.d/head
-echo "nameserver $DNS_MASTER" >> etc/resolvconf/resolv.conf.d/head
-echo "nameserver $DNS_SLAVE" >> etc/resolvconf/resolv.conf.d/head
+echo "search $DOMAIN" >> /etc/resolvconf/resolv.conf.d/head
+echo "nameserver $DNS_MASTER" >> /etc/resolvconf/resolv.conf.d/head
+echo "nameserver $DNS_SLAVE" >> /etc/resolvconf/resolv.conf.d/head
 resolvconf -u
 
 # add riak repo
