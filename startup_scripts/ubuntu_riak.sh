@@ -80,11 +80,11 @@ apt-get install -y riak
 # stop riak service
 service riak stop
 
-# replace ip address nodename
-sed -i "s/riak@127.0.0.1/riak@${IP_ADDRESS}/" /etc/riak/riak.conf
-
 # Get riak.conf from zetaops public cloud tools
 wget https://raw.githubusercontent.com/zetaops/zcloud/master/containers/riak/conf/riak.conf -O /etc/riak/riak.conf
+
+# replace ip address nodename
+sed -i "s/riak@127.0.0.1/riak@${IP_ADDRESS}/" /etc/riak/riak.conf
 
 # set strong consistency and riak_control on or off depends on docker run env vars
 sed -i "s/strong_consistency = off/strong_consistency = ${STRONG_CONSISTENCY}/" /etc/riak/riak.conf
