@@ -14,6 +14,21 @@ log4j.appender.unitimeLogFile.layout=org.apache.log4j.PatternLayout \
 log4j.appender.unitimeLogFile.layout.ConversionPattern=[%-d{MM/dd/yy HH:mm:ss}] %-6p %c{1} -> %m%n \
 log4j.logger.org.unitime=DEBUG, unitimeLogFile' >> /usr/local/tomcat/conf/catalina.properties
 
+
+
+RUN echo -e 'tmtbl.custom.properties=${catalina.base}/conf/unitime.properties'  \
+                                            >> /usr/local/tomcat/conf/catalina.properties
+
+RUN echo -e 'connection.url=jdbc:mysql://localhost:3306/timetable \
+             connection.username=timetable \
+             connection.password=unitime \
+             connection.driver_class=com.mysql.jdbc.Driver \
+             dialect=org.hibernate.dialect.MySQLInnoDBDialect \
+             tmtbl.uniqueid.generator=org.hibernate.id.TableHiLoGenerator \
+             default_schema=timetable' >> /usr/local/tomcat/conf/unitime.properties
+
+
+
 EXPOSE 8080
 CMD ["catalina.sh", "run"]
 
