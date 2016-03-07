@@ -170,14 +170,15 @@ coreos:
 
         ExecStop=/usr/bin/docker stop registrator-consul
 
-    -
+    - name: mnt-postgres.mount
       command: start
       content: |
         [Unit]
-        Description=Mount to /mnt/data
+        Description=Mount to /mnt/postgres
+
         [Mount]
         What=/dev/vdb1
-        Where=/mnt/data
+        Where=/mnt/postgres
         Type=ext4
 
     - name: set-hostname.service
