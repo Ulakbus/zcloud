@@ -30,5 +30,5 @@ RUN echo -e 'connection.url=jdbc:mysql://localhost:3306/timetable \
 
 
 EXPOSE 8080
-CMD ["catalina.sh", "run"]
-
+COPY entrypoint.sh /
+CMD ["/entrypoint.sh"]
