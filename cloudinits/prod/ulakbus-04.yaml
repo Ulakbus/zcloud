@@ -1,0 +1,230 @@
+#cloud-config
+# zcloud v0.4
+coreos:
+  update:
+    reboot-strategy: off
+
+  etcd2:
+    # TODO: daha sonra.. https://coreos.com/etcd/docs/latest/clustering.html#dns-discovery
+    # generate a new token for each unique cluster from https://discovery.etcd.io/new?size=3
+    # specify the initial size of your cluster with ?size=X
+    discovery: https://discovery.etcd.io/20ac288f9b5f9c9bb56711d82ef98636
+    # multi-region and multi-cloud deployments need to use $public_ipv4
+    advertise-client-urls: http://$private_ipv4:2379,http://$private_ipv4:4001
+    initial-advertise-peer-urls: http://$private_ipv4:2380
+    # listen on both the official ports and the legacy ports
+    # legacy ports can be omitted if your application doesn't depend on them
+    listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
+    listen-peer-urls: http://$private_ipv4:2380
+    name: app-04
+    snapshot-count: 5000
+
+  fleet:
+    public-ip: $private_ipv4   # used for fleetctl ssh command
+    metadata: project=ulakbus,disk=sata,name=app-04,machineof=app
+
+  flannel:
+    interface: $private_ipv4
+
+  units:
+    - name: update-engine.service
+      command: stop
+    - name: locksmithd.service
+      command: stop
+    - name: systemd-sysctl.service
+      command: restart
+
+    - name: etcd2.service
+      drop-ins:
+        - name: timeout.conf
+          content: |
+            [Service]
+            TimeoutStartSec=0
+      command: start
+
+    - name: fleet.socket
+      command: start
+      drop-ins:
+      - name: 30-ListenStream.conf
+        content: |
+          [Socket]
+          ListenStream=49153
+
+    - name: fleet.service
+      command: start
+
+    - name: flanneld.service
+      drop-ins:
+        - name: 50-network-config.conf
+          content: |
+            [Service]
+            ExecStartPre=/usr/bin/etcdctl set /coreos.com/network/config '{ "Network": "172.17.0.0/16" }'
+      command: start
+
+    - name: systemd-resolved-restart.service
+      command: start
+      content: |
+        [Unit]
+        Description=Set private DNS
+
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/bin/systemctl restart systemd-resolved
+
+    - name: set-timezone.service
+      # timezone settings. ntp use coreos default pools, just tune timezone
+      # https://coreos.com/docs/cluster-management/setup/configuring-date-and-timezone/
+      command: start
+      content: |
+        [Unit]
+        Description=Set the timezone
+
+        [Service]
+        ExecStart=/usr/bin/timedatectl set-timezone Europe/Istanbul
+        RemainAfterExit=yes
+        Type=oneshot
+
+    - name: set-hostname.service
+      command: start
+      content: |
+        [Unit]
+        Description=Set hostname using hostnamectl as you wish
+
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/bin/hostnamectl set-hostname ulakbus-app-04.zetaops.local
+
+
+    - name: consul.service
+      command: start
+      content: |
+        [Unit]
+        Description=Consul
+        Documentation=https://github.com/zetaops/zcloud/blob/master/docs/consul-service.md
+        Requires=docker.service
+        After=docker.service
+        After=etcd2.service
+        Requires=etcd2.service
+
+        [Service]
+        EnvironmentFile=/etc/environment
+        TimeoutStartSec=0
+        Restart=always
+
+        Environment=DOCKER_REPO=quay.io/democracyworks/consul-coreos
+        Environment=VERSION=0.5.2
+        Environment=CONTAINER=consul
+
+        ExecStartPre=-/usr/bin/docker kill ${CONTAINER}
+        ExecStartPre=-/usr/bin/docker rm ${CONTAINER}
+
+        ExecStartPre=/usr/bin/docker pull ${DOCKER_REPO}:${VERSION}
+
+        ExecStart=/bin/bash -c 'docker run --name ${CONTAINER} --restart=always \
+          --volume /var/run/docker.sock:/var/run/docker.sock \
+          --hostname %H \
+          -p 8300:8300 -p 8301:8301 -p 8301:8301/udp -p 8302:8302 -p 8302:8302/udp \
+          -p 8400:8400 -p 8500:8500 -p 53:8600/udp \
+          ${DOCKER_REPO}:${VERSION} ${COREOS_PRIVATE_IPV4} %m'
+
+        ExecStop=/usr/bin/docker stop ${CONTAINER}
+
+        ExecStopPost=-/usr/bin/etcdctl rm /consul.io/bootstrap/machines/%m
+
+    - name: registrator2etcd.service
+      command: start
+      content: |
+        [Unit]
+        Description=Registrator to Etcd
+
+        After=etcd2.service
+        Requires=etcd2.service
+
+        After=docker.service
+        Requires=docker.service
+
+        [Service]
+        TimeoutStartSec=0
+        EnvironmentFile=/etc/environment
+        Restart=always
+
+        ExecStartPre=-/usr/bin/docker kill registrator-etcd
+        ExecStartPre=-/usr/bin/docker rm registrator-etcd
+        ExecStartPre=/usr/bin/docker pull gliderlabs/registrator:master
+
+        ExecStart=/bin/bash -c 'docker run --name registrator-etcd --hostname %H \
+          -v /var/run/docker.sock:/tmp/docker.sock gliderlabs/registrator:master \
+          -ip ${COREOS_PRIVATE_IPV4} -resync 320 -ttl 60 -ttl-refresh 50 etcd://${COREOS_PRIVATE_IPV4}:4001/services'
+
+        ExecStop=/usr/bin/docker stop registrator-etcd
+
+    - name: registrator2consul.service
+      command: start
+      content: |
+        [Unit]
+        Description=Registrator Consul
+        Documentation=https://github.com/zetaops/zcloud/blob/master/docs/registrator2consul-service.md
+        After=consul.service
+        Requires=consul.service
+
+        After=etcd2.service
+        Requires=etcd2.service
+
+        After=docker.service
+        Requires=docker.service
+
+        [Service]
+        TimeoutStartSec=0
+        EnvironmentFile=/etc/environment
+        Restart=always
+
+        ExecStartPre=-/usr/bin/docker kill registrator-consul
+        ExecStartPre=-/usr/bin/docker rm registrator-consul
+        ExecStartPre=/usr/bin/docker pull gliderlabs/registrator:master
+
+        ExecStart=/bin/bash -c 'docker run --name registrator-consul --hostname %H \
+          -v /var/run/docker.sock:/tmp/docker.sock gliderlabs/registrator:master  \
+          -ip ${COREOS_PRIVATE_IPV4} -resync 320 -ttl 60 -ttl-refresh 50 consul://${COREOS_PRIVATE_IPV4}:8500'
+
+        ExecStop=/usr/bin/docker stop registrator-consul
+
+    - name: swapon.service
+      command: start
+      content: |
+        [Unit]
+        Description=Swap Service
+
+        [Service]
+        Type=oneshot
+        Environment="SWAPFILE=/4GiB.swap"
+        RemainAfterExit=true
+        ExecStartPre=/usr/bin/touch ${SWAPFILE}
+        ExecStartPre=/usr/bin/chattr +C ${SWAPFILE}
+        ExecStartPre=/usr/bin/fallocate -l 4096m ${SWAPFILE}
+        ExecStartPre=/usr/bin/chmod 600 ${SWAPFILE}
+        ExecStartPre=/usr/sbin/mkswap ${SWAPFILE}
+        ExecStartPre=/usr/sbin/losetup -f ${SWAPFILE}
+        ExecStart=/usr/bin/sh -c "/sbin/swapon $(/usr/sbin/losetup -j ${SWAPFILE} | /usr/bin/cut -d : -f 1)"
+        ExecStop=/usr/bin/sh -c "/sbin/swapoff $(/usr/sbin/losetup -j ${SWAPFILE} | /usr/bin/cut -d : -f 1)"
+        ExecStopPost=/usr/bin/sh -c "/usr/sbin/losetup -d $(/usr/sbin/losetup -j ${SWAPFILE} | /usr/bin/cut -d : -f 1)"
+
+        [Install]
+        WantedBy=multi-user.target
+
+write_files:
+  - path: /etc/systemd/resolved.conf.d/00-zetaops-local-dns.conf
+    permissions: 0644
+    owner: root
+    content: |
+      # private dns servers for local domain
+      [Resolve]
+      DNS=10.61.31.68 10.61.31.67
+
+  - path: /etc/sysctl.d/ulakbus.conf
+    content: |
+      vm.dirty_background_ratio = 5
+      vm.dirty_ratio = 10
+      vm.swappiness = 10
+
+  - path: /etc/motd.d/ulakbus.conf
+    content: "ULAKBUS Projesi yeniliklerini takip etmeyi unutmayin: http://www.ulakbus.org/ \n\n"
