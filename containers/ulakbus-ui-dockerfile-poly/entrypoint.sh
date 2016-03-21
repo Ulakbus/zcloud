@@ -18,6 +18,5 @@ esac
 rm -rf  /usr/share/nginx/html
 cp -rf /tmp/html/dist /usr/share/nginx/html
 echo ui-nighly files have been copied
-#service nginx start
 nginx -g 'daemon off;'
 echo nginx is active
