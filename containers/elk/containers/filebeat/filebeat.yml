@@ -12,7 +12,12 @@ filebeat:
       # For each file found under this path, a harvester is started.
       # Make sure not file is defined twice as this can lead to unexpected behaviour.
       paths:
-        - /var/lib/docker/containers/*/*.log
+	- /var/log/riak/console.log
+	- /var/log/rabbitmq/shutdown_log
+	- /var/log/rabbitmq/*.log
+	- /var/log/rabbitmq/startup_log
+	- /var/log/rabbitmq/shutdown_err
+	- /var/log/rabbitmq/startup_err
 
       # Configure the file encoding for reading files with international characters
       # following the W3C recommendation for HTML5 (http://www.w3.org/TR/encoding).
@@ -209,7 +214,7 @@ output:
   ### Logstash as output
   logstash:
     # The Logstash hosts
-    hosts: [LOGSTASH_HOST]
+    hosts: [LOGSTASH_HOST1:LOGSTASHPORT1, LOGSTASH_HOST2:LOGSTASHPORT2]
 
     # Number of workers per Logstash host.
     #worker: 1
