@@ -2,22 +2,17 @@
 
 ############################# Filebeat ######################################
 filebeat:
-  # List of prospectors to fetch data.
   prospectors:
-    # Each - is a prospector. Below are the prospector specific configurations
     -
-      # Paths that should be crawled and fetched. Glob based paths.
-      # To fetch all ".log" files from a specific level of subdirectories
-      # /var/log/*/*.log can be used.
-      # For each file found under this path, a harvester is started.
-      # Make sure not file is defined twice as this can lead to unexpected behaviour.
       paths:
-	- /var/log/riak/console.log
-	- /var/log/rabbitmq/shutdown_log
-	- /var/log/rabbitmq/*.log
-	- /var/log/rabbitmq/startup_log
-	- /var/log/rabbitmq/shutdown_err
-	- /var/log/rabbitmq/startup_err
+        - /var/log/riak/console.log
+        - /var/log/rabbitmq/shutdown_log
+        - /var/log/rabbitmq/*.log
+        - /var/log/riak/console.log
+        - /var/log/rabbitmq/startup_log
+        - /var/log/rabbitmq/shutdown_err
+        - /var/log/rabbitmq/startup_err
+      document_type: syslog
 
       # Configure the file encoding for reading files with international characters
       # following the W3C recommendation for HTML5 (http://www.w3.org/TR/encoding).
@@ -214,7 +209,7 @@ output:
   ### Logstash as output
   logstash:
     # The Logstash hosts
-    hosts: [LOGSTASH_HOST1:LOGSTASHPORT1, LOGSTASH_HOST2:LOGSTASHPORT2]
+    hosts: ["LOGSTASH_HOST"]
 
     # Number of workers per Logstash host.
     #worker: 1
