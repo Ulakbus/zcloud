@@ -1,6 +1,3 @@
-HAProxy for ELK, Riak, Redis and Ulakbus
-=========================
-
-HAProxy Configuration of Elasticsearch, Logstash & Kibana (ELK) Cluster, Redis and Riak Servers and Ulakbus.
-
-
+HAProxy with Confd 
+==================
+Base docker for haprox-confd-ulakbus docker.

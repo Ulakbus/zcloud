@@ -2,7 +2,6 @@
 src	= "haproxy.cfg"
 dest	= "/usr/local/etc/haproxy/haproxy.cfg"
 keys	= [
-    "/services/elk-5601",
-    "/services/elk-9200"
+    "/zaerp/rabbitmq-servers-5672"
 ]
 reload_cmd 	= "haproxy -V -f /usr/local/etc/haproxy/haproxy.cfg -p /var/run/haproxy.pid -d -D -sf $(cat /var/run/haproxy.pid)"

@@ -7,6 +7,7 @@ keys	= [
     "/services/buildbot-master-8010",
     "/services/ulakbus-ui-nightly-80",
     "/services/ulakbus-nightly",
-    "/services/ulakbus-test"
+    "/services/ulakbus-test",
+    "/services/elk-5601"
 ]
 reload_cmd 	= "haproxy -V -f /usr/local/etc/haproxy/haproxy.cfg -p /var/run/haproxy.pid -d -D -sf $(cat /var/run/haproxy.pid)"
