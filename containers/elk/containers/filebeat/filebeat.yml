@@ -209,7 +209,7 @@ output:
   ### Logstash as output
   logstash:
     # The Logstash hosts
-    hosts: ["LOGSTASH_HOST"]
+    hosts: ["LOGSTASH_HOST1:LOGSTASHPORT1","LOGSTASH_HOST2:LOGSTASHPORT2"]
 
     # Number of workers per Logstash host.
     #worker: 1
@@ -343,5 +343,3 @@ logging:
   # Sets log level. The default log level is error.
   # Available log levels are: critical, error, warning, info, debug
   #level: error
-
-
