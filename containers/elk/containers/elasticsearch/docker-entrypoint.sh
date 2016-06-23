@@ -18,7 +18,7 @@ if [ "$1" = 'elasticsearch' -a "$(id -u)" = '0' ]; then
 fi
 
 
-cat /usr/share/elasticsearch/config/elasticsearch.yml | sed "s/ES_NODE_2/$ES_NODE_2/" > /usr/share/elasticsearch/config/elasticsearch.yml.tmp
+cat /usr/share/elasticsearch/config/elasticsearch.yml | sed "s/ES_NODE_2/$ES_NODE_2/" | sed "s/PUBLISH_HOST/$PUBLISH_HOST/" > /usr/share/elasticsearch/config/elasticsearch.yml.tmp
 cat /usr/share/elasticsearch/config/elasticsearch.yml.tmp > /usr/share/elasticsearch/config/elasticsearch.yml 
 rm /usr/share/elasticsearch/config/elasticsearch.yml.tmp
 
