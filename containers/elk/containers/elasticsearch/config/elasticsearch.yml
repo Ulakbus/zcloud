@@ -1,2 +1,4 @@
 network.host: "0.0.0.0"
 discovery.zen.ping.unicast.hosts: [ES_NODE_2]
+cluster.name: "zetaops"
+network.publish_host: PUBLISH_HOST
