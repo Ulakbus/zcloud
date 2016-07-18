@@ -1,4 +1,4 @@
-FROM zops-pypy3-git
+FROM zetaops/zops-pypy3-git
 
 # create app directory and clone zaerp master
 RUN mkdir /app
