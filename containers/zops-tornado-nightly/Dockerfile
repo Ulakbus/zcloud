@@ -7,7 +7,7 @@ ENV RABBIT_SERVER zengine.settings
 
 # libssl and libffi dev packages for riak client
 RUN apt-get update && apt-get install -y --no-install-recommends build-essential
-               && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN apt-get update && apt-get install -y git && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Open ports for HTTP and Protocol Buffers
 EXPOSE 9001

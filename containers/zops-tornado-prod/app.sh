@@ -4,13 +4,13 @@ mkdir /app
 cd /app
 
 ### Clone ulakbus from github ###
-git clone https://github.com/zetaops/ulakbus.git
+git clone https://github.com/zetaops/zengine.git
 
 ### Run setup.py ###
-cd /app/ulakbus/
+cd /app/zengine/
 # checkout to the tagged version
-git checkout $(git describe --abbrev=0 --tags)
+git checkout master
 python setup.py install
 
-cd /app/ulakbus/gunicorn
-pypy3 your-daemon-or-script.py
+cd /app/zengine/zengine/tornado_server
+pypy3 server.py
