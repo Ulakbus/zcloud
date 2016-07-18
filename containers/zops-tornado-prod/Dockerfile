@@ -10,7 +10,7 @@ RUN git clone https://github.com/zetaops/zengine.git
 ### Run setup.py ###
 WORKDIR /app/zengine/
 
-RUN git checkout master
+RUN git checkout $(git describe --abbrev=0 --tags)
 RUN pypy3 setup.py install
 
 # Open ports for HTTP and Protocol Buffers
