@@ -1,7 +1,7 @@
 FROM debian:jessie
 
-ENV FILEBEAT_VERSION 1.1.0
-ENV FILEBEAT_SHA1 fecdb702870d51322816d05e0bd7292dedc10b79
+ENV FILEBEAT_VERSION 1.2.3
+ENV FILEBEAT_SHA1 c201bac564eba62724465917468ccf7e266768fc
 
 RUN apt-get -y update
 RUN apt-get -y install apt-transport-https

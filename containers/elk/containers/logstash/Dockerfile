@@ -46,4 +46,3 @@ RUN chmod +x /docker-entrypoint.sh
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
 CMD ["logstash", "-f", "/logstash_config/logstash.conf"]
-
