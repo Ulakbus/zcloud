@@ -16,7 +16,7 @@ RUN mkdir /app
 WORKDIR /app
 
 ### Clone ulakbus from github ###
-RUN git clone https://github.com/ulakbus/zengine.git
+RUN git clone https://github.com/zetaops/ulakbus.git
 
 ### Run setup.py ###
 WORKDIR /app/ulakbus/
