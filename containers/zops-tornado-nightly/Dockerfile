@@ -15,4 +15,4 @@ RUN pypy3 setup.py install
 # Open ports for HTTP and Protocol Buffers
 EXPOSE 9001
 
-CMD ["pypy3" "/app/zengine/zengine/tornado_server/server.py"]
+CMD ["pypy3", "/app/zengine/zengine/tornado_server/server.py"]
