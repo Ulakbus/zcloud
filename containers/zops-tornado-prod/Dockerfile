@@ -1,4 +1,4 @@
-FROM zetaops/zops-pypy3-git
+FROM zetaops/zops-pypy2-git
 
 # create app directory and clone zaerp master
 RUN mkdir /app
@@ -10,6 +10,7 @@ RUN git clone https://github.com/zetaops/zengine.git
 ### Run setup.py ###
 WORKDIR /app/zengine/zengine/tornado_server
 
+# Checkout latest tag
 RUN git checkout $(git describe --tags `git rev-list --tags --max-count=1`)
 
 # Open ports for HTTP and Protocol Buffers
