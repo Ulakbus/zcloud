@@ -8,11 +8,9 @@ WORKDIR /app
 RUN git clone https://github.com/zetaops/zengine.git
 
 ### Run setup.py ###
-WORKDIR /app/zengine/
-
-RUN pypy3 setup.py install
+WORKDIR /app/zengine/zengine/tornado_server
 
 # Open ports for HTTP and Protocol Buffers
 EXPOSE 9001
 
-CMD ["pypy3", "/app/zengine/zengine/tornado_server/server.py"]
+CMD ["pypy", "server.py"]
