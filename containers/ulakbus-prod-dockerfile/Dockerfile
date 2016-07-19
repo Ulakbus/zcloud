@@ -10,7 +10,9 @@ RUN git clone https://github.com/zetaops/ulakbus.git
 ### Run setup.py ###
 WORKDIR /app/ulakbus/
 
-RUN git checkout $(git describe --abbrev=0 --tags)
+# Checkout latest tag
+RUN git checkout $(git describe --tags `git rev-list --tags --max-count=1`)
+
 RUN python setup.py install
 
 RUN apt-get purge -y gcc \
