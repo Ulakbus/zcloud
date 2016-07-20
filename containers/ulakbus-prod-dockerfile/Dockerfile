@@ -4,7 +4,7 @@ FROM zetaops/ulakbus-base
 RUN mkdir /app
 WORKDIR /app
 
-RUN "sed -i \"1s/^/import sys \nsys.setdefaultencoding('utf-8') \n /\" /etc/python2.7/sitecustomize.py"
+RUN sed -i "1s/^/import sys \nsys.setdefaultencoding('utf-8') \n /" /etc/python2.7/sitecustomize.py
 
 ### Clone ulakbus from github ###
 RUN git clone https://github.com/zetaops/ulakbus.git
