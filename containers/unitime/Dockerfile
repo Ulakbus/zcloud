@@ -6,7 +6,7 @@ COPY unitime/web/UniTime.war /usr/local/tomcat/webapps/
 COPY mysql-connector-java-5.1.37/mysql-connector-java-5.1.37-bin.jar \
                                                /usr/local/tomcat/lib/mysql-connector-java-5.1.37-bin.jar
 
-RUN echo -e 'log4j.appender.unitimeLogFile=org.apache.log4j.DailyRollingFileAppender \
+RUN echo 'log4j.appender.unitimeLogFile=org.apache.log4j.DailyRollingFileAppender \
 log4j.appender.unitimeLogFile.File=${catalina.base}/logs/unitime-debug.log \
 log4j.appender.unitimeLogFile.DatePattern='\''.'\''yyyy-MM-dd \
 log4j.appender.unitimeLogFile.Append=true \
@@ -16,10 +16,10 @@ log4j.logger.org.unitime=DEBUG, unitimeLogFile' >> /usr/local/tomcat/conf/catali
 
 
 
-RUN echo -e 'tmtbl.custom.properties=${catalina.base}/conf/unitime.properties'  \
+RUN echo 'tmtbl.custom.properties=${catalina.base}/conf/unitime.properties'  \
                                             >> /usr/local/tomcat/conf/catalina.properties
 
-RUN echo -e 'connection.url=jdbc:mysql://localhost:3306/timetable \
+RUN echo 'connection.url=jdbc:mysql://localhost:3306/timetable \
              connection.username=timetable \
              connection.password=unitime \
              connection.driver_class=com.mysql.jdbc.Driver \
@@ -31,4 +31,5 @@ RUN echo -e 'connection.url=jdbc:mysql://localhost:3306/timetable \
 
 EXPOSE 8080
 COPY entrypoint.sh /
+RUN chmod +x /entrypoint.sh
 CMD ["/entrypoint.sh"]
