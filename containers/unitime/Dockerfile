@@ -1,5 +1,5 @@
 FROM tomcat:7-jre8
-MAINTAINER Ali Riza Keles, alirza@zetaops.io
+MAINTAINER Ali Riza Keles, aliriza@zetaops.io
 ENV DEBIAN_FRONTEND noninteractive
 
 COPY unitime/web/UniTime.war /usr/local/tomcat/webapps/
@@ -19,15 +19,13 @@ log4j.logger.org.unitime=DEBUG, unitimeLogFile' >> /usr/local/tomcat/conf/catali
 RUN echo 'tmtbl.custom.properties=${catalina.base}/conf/unitime.properties'  \
                                             >> /usr/local/tomcat/conf/catalina.properties
 
-RUN echo 'connection.url=jdbc:mysql://localhost:3306/timetable \
-             connection.username=timetable \
-             connection.password=unitime \
+RUN echo 'connection.url=jdbc:mysql://MYSQL_SERVER_PORT/timetable \
+             connection.username=MYSQL_USER \
+             connection.password=MYSQL_PASSWORD \
              connection.driver_class=com.mysql.jdbc.Driver \
              dialect=org.hibernate.dialect.MySQLInnoDBDialect \
              tmtbl.uniqueid.generator=org.hibernate.id.TableHiLoGenerator \
-             default_schema=timetable' >> /usr/local/tomcat/conf/unitime.properties
-
-
+             default_schema=MYSQL_DATABASE' >> /usr/local/tomcat/conf/unitime.properties
 
 EXPOSE 8080
 COPY entrypoint.sh /
